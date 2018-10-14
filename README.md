@@ -5,18 +5,18 @@ This tool uses tables from [Transhuman](http://eclipsephase.com/releases/transhu
 
 
 Requirements
-============
+-------
 
 - Java 8 or newer
 - An API key from [Behind the Name](https://www.behindthename.com/api/)
 - A local published build of the [EP Compendium](https://github.com/Bathtor/EPCompendium)
 
 Building
-========
+-------
 Run `sbt assembly`.
 
 Running
-=======
+-------
 Before you can run the tool, you need a file called `application.conf` in the same folder as `run.sh`. In this file you need to specify your Behind the Name API key like `chargen.behindthename.api-key = "<API KEY HERE>"`.
 
 Then simply call `./run.sh --help` from bash to see the available options.
