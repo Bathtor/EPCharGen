@@ -33,6 +33,9 @@ object Main extends StrictLogging {
       if (conf.filterMorph.isSupplied) {
         filters ::= conf.filterMorph();
       }
+      if (conf.filterBirthMorph.isSupplied) {
+        filters ::= conf.filterBirthMorph();
+      }
       filters match {
         case Nil => CharFilter.Accept
         case l   => CharFilter.All(l)
@@ -91,7 +94,7 @@ object Main extends StrictLogging {
     };
     val resultsWithNamesF = Future.sequence(resultsWithNamesFs);
     logger.info(s"Awaiting ${resultsWithNamesFs.size} names...");
-    val resultsWithNames = Await.result(resultsWithNamesF, 10 seconds);
+    val resultsWithNames = Await.result(resultsWithNamesF, BehindTheName.genTimeout);
     logger.info("Rendering...");
     val seedString = if (conf.deterministic() || conf.number() == 1 || conf.seed.isSupplied) {
       s"""
@@ -156,6 +159,7 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val filterFaction = opt[String]("filter-faction", descr = "Only show results where faction contains <arg>").map(CharFilter.Faction(_));
   val filterGender = opt[String]("filter-gender", descr = "Only show results where apparent gender is <arg>").map(CharFilter.ApparentGender(_));
   val filterMorph = opt[String]("filter-morph", descr = "Only show results wearing a <arg> model").map(CharFilter.ActiveMorph(_));
+  val filterBirthMorph = opt[String]("filter-birth-morph", descr = "Only show results born in a <arg> model").map(CharFilter.BirthMorph(_));
 
   val lifepath = opt[Boolean]("lifepath", descr = "Use Life Path system from Transhuman.");
   val fair = toggle("fair", default = Some(true), descrYes = "Try to generate balanced characters.", descrNo = "Generate (potentially highly) unbalanced characters. Use only for non-combat NPCs.")

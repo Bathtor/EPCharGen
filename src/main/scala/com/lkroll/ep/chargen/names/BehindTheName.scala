@@ -21,6 +21,7 @@ object BehindTheName extends StrictLogging {
   import akka.pattern.ask;
 
   private val system = ActorSystem("BehindTheName");
+  val genTimeout = Duration.fromNanos(system.settings.config.getDuration("chargen.gen-timeout", java.util.concurrent.TimeUnit.NANOSECONDS));
   private val client = system.actorOf(Props(new BehindTheNameClient()), name = "client");
   import system.dispatcher;
   private val cancellable = system.scheduler.schedule(

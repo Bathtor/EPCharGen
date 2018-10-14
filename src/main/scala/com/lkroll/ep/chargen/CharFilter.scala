@@ -34,6 +34,10 @@ object CharFilter {
     override def matches(char: Character): Boolean = char.activeMorph.model.contains(s);
   }
 
+  case class BirthMorph(s: String) extends CharFilter {
+    override def matches(char: Character): Boolean = char.startingMorph.name.contains(s);
+  }
+
   case class Any(filters: List[CharFilter]) extends CharFilter {
     override def matches(char: Character): Boolean = filters.exists(f => f.matches(char));
   }
