@@ -3,53 +3,56 @@ package com.lkroll.ep.chargen.character
 import com.lkroll.ep.compendium._
 import com.lkroll.ep.chargen.creationpackages.ChoosingAMorph
 import com.lkroll.ep.chargen.rendering.Renderer
-import com.lkroll.ep.chargen.Implicits.AptitudesRendering
 import com.lkroll.ep.chargen.impression.Personality
 
-case class Aptitudes(base: AptitudeValues, morphBoni: AptitudeValues, morphMax: AptitudeValues) {
-  def cog: Int = total(Aptitude.COG);
-  def coo: Int = total(Aptitude.COO);
-  def int: Int = total(Aptitude.INT);
-  def ref: Int = total(Aptitude.REF);
-  def sav: Int = total(Aptitude.SAV);
-  def som: Int = total(Aptitude.SOM);
-  def wil: Int = total(Aptitude.WIL);
-
-  def total: AptitudeValues = AptitudeValues(
-    cog = Some(cog),
-    coo = Some(coo),
-    int = Some(int),
-    ref = Some(ref),
-    sav = Some(sav),
-    som = Some(som),
-    wil = Some(wil));
-
-  private def total(apt: Aptitude): Int = {
-    Math.min(morphMax.getValueFor(apt).getOrElse(20), base.valueFor(apt) + morphBoni.valueFor(apt))
-  }
-}
-
-case class Character(
+case class CharGenCharacter(
   name:             String,
-  personality:      Option[Personality]           = None,
-  gender:           GenderIdentity.GenderIdentity,
-  age:              Int                           = -1,
-  motivations:      List[Motivation]              = Nil,
-  faction:          String                        = "None",
+  personality:      Option[Personality]                  = None,
+  gender:           GenderIdentity,
+  age:              Int                                  = -1,
+  motivations:      List[Motivation]                     = Nil,
+  faction:          String                               = "None",
   aptitudes:        Aptitudes,
-  moxie:            Int                           = 0,
+  moxie:            Int                                  = 0,
   skills:           List[Skill],
   background:       String,
   startingMorph:    MorphModel,
   activeMorph:      MorphInstance,
-  traits:           List[EPTrait]                 = Nil,
-  history:          List[String]                  = Nil,
-  startingCredit:   Int                           = 0,
-  rep:              Map[RepNetwork, Int]          = Map.empty,
-  isAsync:          Boolean                       = false,
-  psiChiSleights:   List[PsiSleight]              = Nil,
-  psiGammaSleights: List[PsiSleight]              = Nil,
-  gear:             List[Gear]                    = Nil) {
+  traits:           List[EPTrait]                        = Nil,
+  history:          List[String]                         = Nil,
+  startingCredit:   Int                                  = 0,
+  rep:              Map[RepNetwork, Int]                 = Map.empty,
+  isAsync:          Boolean                              = false,
+  psiChiSleights:   List[PsiSleight]                     = Nil,
+  psiGammaSleights: List[PsiSleight]                     = Nil,
+  gear:             List[GearEntry]                      = Nil,
+  weapons:          List[Either[Weapon, WeaponWithAmmo]] = Nil,
+  armour:           List[Either[Armour, ModdedArmour]]   = Nil,
+  software:         List[Software]                       = Nil) {
+
+  def toCompendium(): EPCharacter = EPCharacter(
+    name = name,
+    gender = gender,
+    age = age,
+    motivations = motivations,
+    faction = faction,
+    aptitudes = aptitudes,
+    moxie = moxie,
+    skills = skills.map(_.toCompendium()),
+    background = background,
+    startingMorph = startingMorph,
+    activeMorph = activeMorph,
+    traits = traits,
+    history = history,
+    startingCredit = startingCredit,
+    rep = rep,
+    isAsync = isAsync,
+    psiChiSleights = psiChiSleights,
+    psiGammaSleights = psiGammaSleights,
+    gear = gear,
+    weapons = weapons,
+    armour = armour,
+    software = software);
 
   lazy val appearance: String = {
     val descr = {
@@ -80,7 +83,7 @@ case class Character(
     renderer.newline();
     renderer.labelled("Faction", faction);
     renderer.newline();
-    renderer.labelled("Motivations", motivations.map(_.rendered).mkString(", "));
+    renderer.labelled("Motivations", motivations.map(_.text).mkString(", "));
     renderer.newline();
     if (isAsync) {
       renderer.value("Character has been infected with the Watts-MacLeod virus.");
@@ -128,7 +131,18 @@ case class Character(
     renderer.section("History");
     renderer.list(history);
     renderer.section("Gear");
-    renderer.list(gear.map(_.name));
+    val allGear = List(
+      gear.map(g => s"${g.item.templateTitle} (${g.count})"),
+      armour.map{
+        case Left(a)   => a.templateTitle
+        case Right(am) => am.templateTitle
+      },
+      weapons.map {
+        case Left(w)   => w.templateTitle
+        case Right(wa) => wa.templateTitle
+      },
+      software.map(_.templateTitle));
+    renderer.list(allGear.flatten.sorted);
   }
 
   private def aptValuesToRow(apts: AptitudeValues, default: Int = 0): (List[String], List[String]) = {

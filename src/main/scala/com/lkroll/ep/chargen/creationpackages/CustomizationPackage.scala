@@ -2,17 +2,15 @@ package com.lkroll.ep.chargen.creationpackages
 
 import com.lkroll.ep.chargen.Random
 import com.lkroll.ep.chargen.character._
-import com.lkroll.ep.compendium.Aptitude
-import com.lkroll.ep.compendium.data.{ Disorders => DisorderData, _ }
+import com.lkroll.ep.compendium.{ Aptitude, SkillCategory }
+import com.lkroll.ep.compendium.data.{ DefaultSkills, Disorders => DisorderData, _ }
 
 case class CustomizationPackage(
   label:  String,
   mods:   List[PackageContent]       = Nil,
-  skills: List[PackageContent.Skill] = Nil) extends Package {
-  override type Self = CustomizationPackage;
-  override def withPrefix(prefix: String): Self = this.copy(label = s"$prefix $label");
+  skills: List[PackageContent.Skill] = Nil) extends PPPackage {
   override def ppCost: Int = 1;
-  override def applyTo(c: Character, rand: Random): Character = {
+  override def applyTo(c: CharGenCharacter, rand: Random): CharGenCharacter = {
     val moddedChar = mods.foldLeft(c) { (acc, mod) =>
       mod match {
         case PackageContent.Mod(m)       => m.applyTo(acc)
@@ -28,9 +26,9 @@ case class CustomizationPackage(
 
 object CustomizationPackages {
   import PackageImplicits._;
-  import Skills.Defaults.{ list => skillList, _ }
-  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter };
-  import RepNetwork._;
+  import DefaultSkills.{ list => skillList, _ };
+  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, skilldef2skill };
+  import RepNetworks._;
 
   val artist = CustomizationPackage(
     label = "Artist",
@@ -59,7 +57,7 @@ object CustomizationPackages {
       CharacterMod.BecomeAsync,
       Sleights.PsiChi + 7),
     skills = List(
-      Skills.chooseOnly(40, Skills.SkillCategory.Psi)));
+      Skills.chooseOnly(40, SkillCategory.Psi)));
 
   val athletics = CustomizationPackage(
     label = "Athletics",
@@ -128,12 +126,12 @@ object CustomizationPackages {
     label = "Mentalist",
     mods = List(Sleights + 4),
     skills = List(
-      Skills.chooseOnly(40, Skills.SkillCategory.Psi),
-      Skills.chooseOnly(40, Skills.SkillCategory.Psi)));
+      Skills.chooseOnly(40, SkillCategory.Psi),
+      Skills.chooseOnly(40, SkillCategory.Psi)));
 
   val networker = CustomizationPackage(
     label = "Networker",
-    mods = List(r(RepNetwork.chooseAny(_, +100))),
+    mods = List(r(RepNetworks.chooseAny(_, +100))),
     skills = List(
       networking.anyField(30),
       networking.anyField(30),

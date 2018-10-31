@@ -54,6 +54,31 @@ object PackageContent {
     }
 
     def at(ranks: Int): Skill = this.copy(ranks = ranks);
+
+    def matches(s: Skills.Skill): Boolean = {
+      val nameMatch = skill match {
+        case Left(name)                           => s.name == name
+        case Right(SkillChoice.PickAny)           => true
+        case Right(SkillChoice.OneOf(skills))     => skills.contains(s.name)
+        case Right(SkillChoice.PickOnly(filters)) => filters.exists(_.matches(s))
+      };
+      if (nameMatch) {
+        s.field match {
+          case Some(sf) => {
+            field match {
+              case Left(Some(fieldName))            => sf == fieldName
+              case Left(None)                       => false
+              case Right(SkillChoice.PickAny)       => true
+              case Right(SkillChoice.OneOf(fields)) => fields.contains(sf)
+              case Right(SkillChoice.PickOnly(_))   => ??? // doesn't make sense here
+            }
+          }
+          case None => true
+        }
+      } else {
+        false
+      }
+    }
   }
 
   sealed trait SkillChoice;

@@ -4,7 +4,7 @@ import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.character._
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ Aptitude, Effect, EPTrait, MorphModel, MorphType }
+import com.lkroll.ep.compendium.{ Aptitude, Effect, EPTrait, MorphModel, MorphType, SkillCategory }
 import com.lkroll.ep.compendium.data._
 
 case class FallEventResult(descr: String, effects: List[FallEventEffect]) {
@@ -37,7 +37,7 @@ object FallEventEffect {
 object FallEvent extends Table {
   import Implicits.RandomArray
   import CharImplicits._;
-  import Skills.Defaults._;
+  import DefaultSkills._;
   import PackageImplicits.{ Moxie, StartingCredit, morphT2filter };
 
   override type Result = FallEventResult;
@@ -124,9 +124,9 @@ object FallEvent extends Table {
     (35 to 36) -> RandMorph("You hide your body away in cold storage on Earth before farcasting off to safety.", ChoosingAMorph.randMorph),
     (37 to 38) -> MultipleEntries("Your ego escapes the devastation of Earth, only to be locked away in cold storage for years. You are only recently resleeved.", RandMorph("", ChoosingAMorph.randMorph), CharMod("", TraitsNegativeEP.realWorldNaivete)),
     (39 to 40) -> MultipleEntries("Your ego survives the Fall but is locked in simulspace for years before you are resleeved.", RandMorph("", ChoosingAMorph.randMorph), CharMod("", interfacing + 20)),
-    (41 to 42) -> MultipleEntries("After escaping the Fall, you are forced into indentured service before you are resleeved.", RandMorph("", ChoosingAMorph.randOnly(_, MorphType.Synthmorph)), RandCharMod("", Skills.modOnly(_, 20, Skills.SkillCategory.Technical))),
+    (41 to 42) -> MultipleEntries("After escaping the Fall, you are forced into indentured service before you are resleeved.", RandMorph("", ChoosingAMorph.randOnly(_, MorphType.Synthmorph)), RandCharMod("", Skills.modOnly(_, 20, SkillCategory.Technical))),
     (43 to 44) -> CharMod("You do what you can to help, but you still lose almost everyone in your life.", Moxie + 1),
-    (45 to 46) -> MultipleEntries("You heroically sacrifice yourself so that others can escape.", RandMorph("", ChoosingAMorph.randMorph), RandCharMod("", RepNetwork.chooseAny(_, 10))),
+    (45 to 46) -> MultipleEntries("You heroically sacrifice yourself so that others can escape.", RandMorph("", ChoosingAMorph.randMorph), RandCharMod("", RepNetworks.chooseAny(_, 10))),
     (47 to 48) -> CharMod("You risk your life in a desperate holding action.", TraitsPositiveEP.brave),
     (49 to 50) -> TakeFocus("You are infected ... but get better.", CustomizationPackages.async),
     (51 to 52) -> CharMod("You learn the hard way how susceptible you are to exsurgent influence.", TraitsNegativeEP.psyVulnerability),
@@ -145,7 +145,7 @@ object FallEvent extends Table {
     (77 to 78) -> CharMod("You exhibit natural leadership in a time of crisis.", Skills.oneOf(persuasion, intimidation) + 10),
     (79 to 80) -> CharMod("The only way you can cope with the loss of your former life is through drugs.", TraitsNegativeTranshuman.drugFiend),
     (81 to 82) -> CharMod("You cope with the horrors you experience in the midst of evacuation the only way you could—by postponing the trauma until you are safe.", TraitsPositiveTranshuman.traumaToleranceLevel1),
-    (83 to 84) -> MultipleEntries("Your willingness to profit from others’ misery gains you respect in some circles.", CharMod("", RepNetwork.gRep + 10), RandCharMod("", RepNetwork.chooseAny(_, -5))),
+    (83 to 84) -> MultipleEntries("Your willingness to profit from others’ misery gains you respect in some circles.", CharMod("", RepNetworks.gRep + 10), RandCharMod("", RepNetworks.chooseAny(_, -5))),
     (85 to 86) -> CharMod("You experience things during the Fall that would leave others a shattered mess.", TraitsPositiveTranshuman.hardening),
     (87 to 88) -> CharMod("You lose everything–and nearly lose your mind as well. It will never recover to its former strength.", TraitsNegativeTranshuman.frailSanityLevel1),
     (89 to 90) -> MultipleEntries("Not only do you die during the Fall, your backups are lost as well. You live on as a beta fork of your original self.", CharMod("", TraitsNegativeTranshuman.beta), RandMorph("", ChoosingAMorph.randMorph)),
@@ -153,7 +153,7 @@ object FallEvent extends Table {
     (93 to 94) -> MultipleEntries("You die during the Fall, but that doesn’t stop you from going to die again, and then again, and then again some more.", CharMod("", TraitsPositiveTranshuman.phoenixLevel1), RandMorph("", ChoosingAMorph.randMorph)),
     (95 to 96) -> CharMod("After committing a crime, you are sentenced to indentured service, but the Fall lets you skip out.", TraitsNegativeTranshuman.defferedIndentureLevel2),
     (97 to 98) -> CharMod("You rack up an impressive kill score fighting TITAN machines.", TraitsPositiveTranshuman.tacnetSniper),
-    (99 to 100) -> CharMod("Your willingness to make lives a priority over material things earns you respect.", RepNetwork.circleARep + 10));
+    (99 to 100) -> CharMod("Your willingness to make lives a priority over material things earns you respect.", RepNetworks.circleARep + 10));
 
   override def label: String = "Fall Event";
   override def source: String = "Transhuman p.63-64";

@@ -36,6 +36,9 @@ object Main extends StrictLogging {
       if (conf.filterBirthMorph.isSupplied) {
         filters ::= conf.filterBirthMorph();
       }
+      if (conf.filterSkillMin.isSupplied) {
+        filters :::= conf.filterSkillMin();
+      }
       filters match {
         case Nil => CharFilter.Accept
         case l   => CharFilter.All(l)
@@ -52,7 +55,11 @@ object Main extends StrictLogging {
 
     val results = (1 to number).map(i => {
       val res = if (conf.lifepath()) {
-        val lpc = new lifepath.LifePathCreation(fair = conf.fair(), firewall = firewall);
+        val lpc = new lifepath.LifePathCreation(
+          fair = conf.fair(),
+          firewall = firewall,
+          gear = conf.gear(),
+          moxie = conf.moxie());
         if (conf.seed.isSupplied || conf.deterministic()) {
           Future.successful {
             val cres = filter.untilMatch {
@@ -94,7 +101,7 @@ object Main extends StrictLogging {
     };
     val resultsWithNamesF = Future.sequence(resultsWithNamesFs);
     logger.info(s"Awaiting ${resultsWithNamesFs.size} names...");
-    val resultsWithNames = Await.result(resultsWithNamesF, BehindTheName.genTimeout);
+    val resultsWithNames = Await.result(resultsWithNamesF, BehindTheName.genTimeout());
     logger.info("Rendering...");
     val seedString = if (conf.deterministic() || conf.number() == 1 || conf.seed.isSupplied) {
       s"""
@@ -160,11 +167,26 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val filterGender = opt[String]("filter-gender", descr = "Only show results where apparent gender is <arg>").map(CharFilter.ApparentGender(_));
   val filterMorph = opt[String]("filter-morph", descr = "Only show results wearing a <arg> model").map(CharFilter.ActiveMorph(_));
   val filterBirthMorph = opt[String]("filter-birth-morph", descr = "Only show results born in a <arg> model").map(CharFilter.BirthMorph(_));
+  val filterSkillMin = opt[List[String]]("filter-skill-min", descr = "Only show results with a skill s at least at total n for <arg>=s>n. Can be specified multiple times.")(listArgConverter(identity)).map { s =>
+    s.map{ str =>
+      val underToSpace = str.replace("_", " ");
+      val split = underToSpace.split(">");
+      require(split.size == 2, "Format for skill filters is [skillName]>[skillTotalMinimum]");
+      val fieldSplit = split(0).split(":");
+      if (fieldSplit.size == 1) {
+        CharFilter.SkillOver(skillName = split(0), minTotal = split(1).toInt)
+      } else {
+        CharFilter.SkillOver(skillName = fieldSplit(0), field = Some(fieldSplit(1)), minTotal = split(1).toInt)
+      }
+    }
+  };
 
   val lifepath = opt[Boolean]("lifepath", descr = "Use Life Path system from Transhuman.");
   val fair = toggle("fair", default = Some(true), descrYes = "Try to generate balanced characters.", descrNo = "Generate (potentially highly) unbalanced characters. Use only for non-combat NPCs.")
   val firewallAlways = opt[Boolean]("firewall-always", descr = "Always generate a Firewall event.");
   val firewallAllow = opt[Boolean]("firewall-allow", descr = "Generate a Firewall event if the history requires it (e.g., character has i-Rep or Networking: Firewall)");
+  val moxie = toggle("moxie", default = Some(true), descrYes = "Allow generated character to have moxie.", descrNo = "Prevent generated characters from having moxie (for example, for NPCs)");
+  val gear = toggle("gear", default = Some(false), descrYes = "Generate gear from starting credit.", descrNo = "List starting credit without generating gear.");
 
   requireOne(lifepath);
   dependsOnAny(fair, List(lifepath));

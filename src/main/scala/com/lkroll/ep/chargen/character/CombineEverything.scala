@@ -2,16 +2,15 @@ package com.lkroll.ep.chargen.character
 
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ Aptitude, AptitudeValues, EPTrait, TraitType }
-import com.lkroll.ep.chargen.character.Skills.SkillCategory.SkillCategory
+import com.lkroll.ep.compendium.{ Aptitude, AptitudeValues, EPTrait, Motivation, TraitType, RepNetwork, SkillCategory }
 import scala.collection.mutable
 
-case class CombinationResult(char: Character, log: List[String])
+case class CombinationResult(char: CharGenCharacter, log: List[String])
 
 object CombineEverything {
   import Implicits._;
 
-  def apply(rand: Random, char: Character): CombinationResult = {
+  def apply(rand: Random, char: CharGenCharacter, allowMoxie: Boolean): CombinationResult = {
     var log: List[String] = Nil;
     val fixedApts = char.aptitudes.copy(morphBoni = char.activeMorph.aptitudeBonus, morphMax = char.activeMorph.aptitudeMax);
     log ::= "Applied Morph Apts";
@@ -32,15 +31,26 @@ object CombineEverything {
       traitCP = tcp;
       log ::= "Picked a negative trait to cover CP imbalance.";
     }
-    val (finalRep, restCP) = levelOutRep(rand, traitCP, fixedRep);
-    log ::= "Levelled out negative rep scored to 0.";
-    // TODO spend final CP?
-    log ::= s"Remaining CP: $restCP";
+    val moxie = if (allowMoxie) char.moxie else 0;
+    var remainingCP = traitCP + (if (allowMoxie) 0 else char.moxie * 15);
+    //println(s"About to level out rep ($remainingCP CP)");
+    val (finalRep, postRepCP) = levelOutRep(rand, remainingCP, fixedRep);
+    log ::= "Levelled out negative rep scores to 0.";
+    remainingCP = postRepCP;
+    var finalSkills = fixedSkills;
+    while (remainingCP > 0) {
+      //println(s"About to sink CP into skills ($remainingCP CP)");
+      val (skills, cp) = sinkCPIntoSkills(rand, remainingCP, finalSkills, char.aptitudes.base);
+      finalSkills = skills;
+      remainingCP = cp;
+    }
+    log ::= "Sunk remaining CP into Skills";
 
     val newChar = char.copy(
+      moxie = moxie,
       aptitudes = fixedApts,
       rep = finalRep,
-      skills = fixedSkills,
+      skills = finalSkills,
       motivations = finalMotivations);
     CombinationResult(newChar, log.reverse)
   }
@@ -72,6 +82,54 @@ object CombineEverything {
     (1 to 3) -> SkillReductionChoice.SplitInHalf,
     (4 to 7) -> SkillReductionChoice.ReduceTo60,
     (8 to 10) -> SkillReductionChoice.SplitMax);
+
+  private def sinkCPIntoSkills(rand: Random, cp: Int, skills: List[Skill], apts: AptitudeValues): (List[Skill], Int) = {
+    require(cp > 0);
+    val (unlimited, limited) = skills.partition(s => s.ranks + apts.valueFor(s.apt) < 80);
+    val (choice, rest): (Skill, List[Skill]) = if (unlimited.isEmpty) {
+      pickNewSkill(rand, skills) match {
+        case Some(s) => (s.instance(0), skills)
+        case None    => ??? // no more skills to pick?!?
+      }
+    } else {
+      val pos = rand.nextInt(unlimited.size);
+      unlimited.splitAt(pos) match {
+        case (Nil, Nil)    => ??? // da fuck?
+        case (h :: r, Nil) => (h, r ::: limited)
+        case (l, h :: r)   => (h, l ::: r ::: limited)
+      }
+    };
+    val remainingSingleCPRanks = Math.max(0, 60 - (choice.ranks + apts.valueFor(choice.apt)));
+    val remainingDoubleCPRanks = 80 - (choice.ranks + apts.valueFor(choice.apt)) - remainingSingleCPRanks;
+    val maxCPToSpend = Math.min(cp, remainingSingleCPRanks + 2 * remainingDoubleCPRanks);
+    val cpToSpend = if (maxCPToSpend == 1) 1 else rand.nextInt(maxCPToSpend - 1) + 1; // spend at least 1 to make this non-pointless
+    val singleCPSpent = Math.min(cpToSpend, remainingSingleCPRanks);
+    var ranks = singleCPSpent;
+    var remainingCP = cpToSpend - singleCPSpent;
+    if (remainingCP > 0) {
+      ranks += remainingCP / 2;
+      remainingCP = (remainingCP / 2) * 2;
+    }
+    val unspentCP = cp - (cpToSpend - remainingCP);
+    val skill = choice.copy(ranks = choice.ranks + ranks);
+    (skill :: rest, unspentCP)
+  }
+
+  private def pickNewSkill(rand: Random, skills: List[Skill]): Option[Skills.Skill] = {
+    // this is fucking expensive, but oh well...
+    val options = Skills.Defaults.list
+      .flatMap(s => s.sampleFields match {
+        case Some(sampleFields) => sampleFields.map(field => s.withField(field))
+        case None               => Array(s)
+      })
+      .filter(s1 => skills.forall(s2 => !s1.matches(s2.skillDef)));
+    if (options.isEmpty) {
+      None
+    } else {
+      val pos = rand.nextInt(options.size);
+      Some(options(pos));
+    }
+  }
 
   private def fixSkills(rand: Random, skills: List[Skill], apts: AptitudeValues): List[Skill] = {
     val (noduplicates, dupChoices) = removeDuplicates(rand, skills);
@@ -292,7 +350,7 @@ object CombineEverything {
     }
     while (assignable > 0) {
       val notLimited = assigned.filter(_._2 < 80);
-      val notAssigned = RepNetwork.list.filterNot(n => assigned.contains(n));
+      val notAssigned = RepNetworks.list.filterNot(n => assigned.contains(n));
       (notLimited.isEmpty, notAssigned.isEmpty) match {
         case (true, true) => ??? // oehm...all networks are maxed out?
         case (true, false) => {
@@ -403,8 +461,10 @@ object CombineEverything {
       case (_, rep) if rep > 0 => rep.toDouble / 10.0;
       case (_, rep)            => 0.0
     } sum;
+    var cpToSpendOnRep = 35.0;
     var rep = fixedRep;
-    while ((remainingCP > 0) && (cpInRep <= 35.0)) {
+    while ((remainingCP > 0) && (cpInRep < cpToSpendOnRep)) {
+      //println(s"Investing into rep remaining=$remainingCP, in-rep=$cpInRep, rep: $rep");
       rep.find(t => t._2 < 0) match {
         case Some((net, r)) => {
           val amount = Math.min(Math.min(Math.ceil(Math.abs(r).toDouble / 10.0).toInt * 10, remainingCP * 10), ((35.0 - cpInRep) * 10).toInt);
@@ -413,14 +473,15 @@ object CombineEverything {
           cpInRep += amount / 10;
         }
         case None => { // no negative networks remaining...can spend freeeeely
+          cpToSpendOnRep = rand.nextDouble() * 34.0 + 1.0; // don't always burn all on rep
           val notLimited = rep.filter(_._2 < 80);
-          val notAssigned = RepNetwork.list.filterNot(n => rep.contains(n));
+          val notAssigned = RepNetworks.list.filterNot(n => rep.contains(n));
           (notLimited.isEmpty, notAssigned.isEmpty) match {
-            case (true, true) => ??? // oehm...all networks are maxed out?
+            case (true, true) => cpToSpendOnRep = 0.0 // oehm...all networks are maxed out?
             case (true, false) => {
               val pick = rand.nextInt(notAssigned.size);
               val net = notAssigned(pick);
-              val amount = Math.min(20, Math.min(remainingCP * 10, ((35.0 - cpInRep) * 10).toInt));
+              val amount = Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt));
               remainingCP -= amount / 10;
               rep += (net -> amount);
               cpInRep += amount / 10;
@@ -429,7 +490,7 @@ object CombineEverything {
               notLimited.foreach {
                 case (net, cur) => {
                   val left = 80 - cur;
-                  val amount = Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((35.0 - cpInRep) * 10).toInt)));
+                  val amount = Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt)));
                   remainingCP -= amount / 10;
                   rep += (net -> (cur + amount));
                   cpInRep += amount / 10;
@@ -440,7 +501,7 @@ object CombineEverything {
               if (rand.nextBoolean()) { // pick a new one
                 val pick = rand.nextInt(notAssigned.size);
                 val net = notAssigned(pick);
-                val amount = Math.min(20, Math.min(remainingCP * 10, ((35.0 - cpInRep) * 10).toInt));
+                val amount = Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt));
                 remainingCP -= amount / 10;
                 rep += (net -> amount);
                 cpInRep += amount / 10;
@@ -448,7 +509,7 @@ object CombineEverything {
                 val pick = rand.nextInt(notLimited.size);
                 val (net, cur) = notLimited.toList(pick);
                 val left = 80 - cur;
-                val amount = Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((35.0 - cpInRep) * 10).toInt)));
+                val amount = Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt)));
                 remainingCP -= amount / 10;
                 rep += (net -> (cur + amount));
                 cpInRep += amount / 10;
@@ -459,7 +520,7 @@ object CombineEverything {
       }
     }
 
-    // once we are out of CP, all we can do it zero out remaining negatives
+    // once we are out of CP, all we can do is zero out remaining negatives
     val finalRep = rep.mapValues(r => if (r < 0) 0 else r);
     (finalRep, remainingCP)
   }

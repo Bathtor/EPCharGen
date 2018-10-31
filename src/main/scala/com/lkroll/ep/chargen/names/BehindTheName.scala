@@ -13,31 +13,68 @@ import scala.concurrent.duration._
 import scala.util.{ Failure, Success, Try }
 import scala.collection.mutable
 
-import com.lkroll.ep.chargen.character.{ Skill, Language, Languages, GenderIdentity }
+import com.lkroll.ep.chargen.character.Skill
+import com.lkroll.ep.compendium.{ Language, GenderIdentity }
+import com.lkroll.ep.compendium.data.Languages
 
 import com.typesafe.scalalogging.StrictLogging
+import com.typesafe.config.Config
 
-object BehindTheName extends StrictLogging {
+trait BehindTheNameAPI {
+  def randomName(): Future[String];
+  def randomName(gender: GenderIdentity, nativeLanguage: Skill, num: Int = 1): Future[String];
+}
+
+object BehindTheName extends BehindTheNameAPI {
+  private lazy val _instance: BehindTheName = {
+    val system = ActorSystem("BehindTheName");
+    new BehindTheName(system)
+  };
+
+  override def randomName(): Future[String] = _instance.randomName();
+  override def randomName(gender: GenderIdentity, nativeLanguage: Skill, num: Int = 1): Future[String] =
+    _instance.randomName(gender, nativeLanguage, num);
+
+  val source = "https://www.behindthename.com";
+
+  def genTimeout(config: Config = _instance.system.settings.config): FiniteDuration = {
+    Duration.fromNanos(
+      config.getDuration(
+        "chargen.gen-timeout",
+        java.util.concurrent.TimeUnit.NANOSECONDS));
+  }
+}
+
+class BehindTheName(val system: ActorSystem) extends BehindTheNameAPI with StrictLogging {
   import akka.pattern.ask;
-
-  private val system = ActorSystem("BehindTheName");
-  val genTimeout = Duration.fromNanos(system.settings.config.getDuration("chargen.gen-timeout", java.util.concurrent.TimeUnit.NANOSECONDS));
-  private val client = system.actorOf(Props(new BehindTheNameClient()), name = "client");
   import system.dispatcher;
-  private val cancellable = system.scheduler.schedule(
-    250 milliseconds,
-    250 milliseconds,
-    client,
-    Tick);
+
+  private val apiKeyT = Try {
+    val key = system.settings.config.getString("chargen.behindthename.api-key");
+    require(key != "<PUT YOUR API KEY HERE>", "You must provide a valid API Key for Behind the Name!");
+    key
+  };
+
+  val genTimeout = BehindTheName.genTimeout(system.settings.config)
+
+  private val clientT = apiKeyT.map(apiKey => system.actorOf(Props(new BehindTheNameClient(apiKey)), name = "behind-the-name-client"));
+
+  private val cancellableT = clientT.map{ client =>
+    system.scheduler.schedule(
+      250 milliseconds,
+      250 milliseconds,
+      client,
+      Tick)
+  };
 
   implicit val timeout = Timeout(5 seconds);
 
-  def randomName(): Future[String] = {
+  override def randomName(): Future[String] = {
     val req = new RandomNameRequest(num = 1, randomSurname = true);
-    random(req)
+    executeRequest(req)
   }
 
-  def randomName(gender: GenderIdentity.GenderIdentity, nativeLanguage: Skill, num: Int = 1): Future[String] = {
+  override def randomName(gender: GenderIdentity, nativeLanguage: Skill, num: Int = 1): Future[String] = {
     import GenderIdentity._;
     val gcode = gender match {
       case Male   => Some(GenderCode.m)
@@ -49,15 +86,18 @@ object BehindTheName extends StrictLogging {
     logger.debug(s"Usage for native language '${lang}': $usage");
 
     val req = new RandomNameRequest(gender = gcode, usage = usage, num = num, randomSurname = true);
-    random(req)
+    executeRequest(req)
   }
 
-  def random(req: NameRequest): Future[String] = {
-    val f = (client ? req).mapTo[NameResult];
-    f.map(_.names.mkString(" "))
+  private def executeRequest(req: NameRequest): Future[String] = {
+    clientT match {
+      case Success(client) => {
+        val f = (client ? req).mapTo[NameResult];
+        f.map(_.names.mkString(" "))
+      }
+      case Failure(f) => Future.failed(f)
+    }
   }
-
-  val source = "https://www.behindthename.com";
 }
 
 case class NameResult(names: List[String])
@@ -91,14 +131,13 @@ case object Tick
 
 private[names] case class OutstandingRequest(request: NameRequest, replyTo: ActorRef)
 
-class BehindTheNameClient extends Actor with ActorLogging {
+class BehindTheNameClient(apiKey: String) extends Actor with ActorLogging {
   import akka.pattern.pipe;
   import context.dispatcher;
 
   final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system));
 
   val http = Http(context.system);
-  val apiKey = context.system.settings.config.getString("chargen.behindthename.api-key");
 
   private val requests = mutable.Queue.empty[OutstandingRequest];
 

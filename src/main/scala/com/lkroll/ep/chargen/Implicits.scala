@@ -18,25 +18,4 @@ object Implicits {
     }
     override def entries: Iterable[T] = arr.toIterable;
   }
-
-  implicit class AptitudesRendering(apts: AptitudeValues) {
-    def toKV: List[(String, String)] = apts.labelledValues.map {
-      case (k, v) => (k.toUpperCase() -> v.get.toString)
-    };
-
-    def getValueFor(apt: Aptitude): Option[Int] = {
-      apt match {
-        case Aptitude.COG => apts.cog
-        case Aptitude.COO => apts.coo
-        case Aptitude.INT => apts.int
-        case Aptitude.REF => apts.ref
-        case Aptitude.SAV => apts.sav
-        case Aptitude.SOM => apts.som
-        case Aptitude.WIL => apts.wil
-      }
-    }
-    def valueFor(apt: Aptitude): Int = {
-      getValueFor(apt).getOrElse(0)
-    }
-  }
 }

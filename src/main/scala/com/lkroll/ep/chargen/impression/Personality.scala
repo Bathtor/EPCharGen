@@ -2,16 +2,16 @@ package com.lkroll.ep.chargen.impression
 
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.Implicits.RandomArray
-import com.lkroll.ep.chargen.character.{ Character, GenderIdentity }
+import com.lkroll.ep.chargen.character.CharGenCharacter
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.MorphInstance
+import com.lkroll.ep.compendium.{ GenderIdentity, MorphInstance }
 
 case class Personality(style: String, voice: String) {
   def render: String = s"A $style personality, speaking in $voice";
 }
 
 class PersonalityTable(
-  val genderIdentity: GenderIdentity.GenderIdentity,
+  val genderIdentity: GenderIdentity,
   val actualAge:      Int,
   val currentMorph:   MorphInstance) extends Table {
   import PersonalityTable._;
@@ -54,7 +54,7 @@ class PersonalityTable(
 }
 
 object PersonalityTable {
-  def forChar(char: Character): PersonalityTable = new PersonalityTable(char.gender, char.age, char.activeMorph);
+  def forChar(char: CharGenCharacter): PersonalityTable = new PersonalityTable(char.gender, char.age, char.activeMorph);
 
   val dataStyle: RollTableLike[String] = Array(
     "Doc (paternal)",

@@ -2,19 +2,19 @@ package com.lkroll.ep.chargen.creationpackages
 
 import com.lkroll.ep.chargen.{ Implicits, Random }
 import com.lkroll.ep.chargen.character._
-import com.lkroll.ep.compendium.Aptitude
-import com.lkroll.ep.compendium.data.{ Disorders => DisorderData, _ }
+import com.lkroll.ep.compendium.{Aptitude, Motivation, SkillCategory}
+import com.lkroll.ep.compendium.data.{ DefaultSkills, Disorders => DisorderData, _ }
 
 case class BackgroundPackage(
   label:       String,
   level:       PackageLevel,
   motivations: List[Motivation]           = Nil,
   mods:        List[PackageContent]       = Nil,
-  skills:      List[PackageContent.Skill] = Nil) extends Package {
+  skills:      List[PackageContent.Skill] = Nil) extends GroupedPackage {
   override type Self = BackgroundPackage;
   override def withPrefix(prefix: String): Self = this.copy(label = s"$prefix $label");
   override def ppCost: Int = level.ppCost;
-  override def applyTo(c: Character, rand: Random): Character = {
+  override def applyTo(c: CharGenCharacter, rand: Random): CharGenCharacter = {
     val motivatedChar = c.copy(motivations = c.motivations ++ motivations);
     val moddedChar = mods.foldLeft(motivatedChar) { (acc, mod) =>
       mod match {
@@ -34,10 +34,9 @@ case class BackgroundPackage(
 object BackgroundPackages {
   import Implicits.RandomArray;
   import PackageImplicits._;
-  import Skills.SkillCategory;
-  import Skills.Defaults.{ list => skillList, _ };
-  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation };
-  import RepNetwork._;
+  import DefaultSkills.{ list => skillList, _ };
+  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation, skilldef2skill  };
+  import RepNetworks._;
 
   val colonistCommandStaff = PackageGroup(
     label = "Colonist: Command Staff",
@@ -71,7 +70,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SAV + 5,
-        r(rand => RepNetwork.chooseAny(rand, +50))),
+        r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(40),
         art.anyField(40),
@@ -117,7 +116,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.REF + 5,
-        r(rand => RepNetwork.chooseAny(rand, +50))),
+        r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.oneOf("Astrophysics", "Engineering").at(30),
         fray.at(20),
@@ -164,7 +163,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COG + 5,
-        r(rand => RepNetwork.chooseAny(rand, +50))),
+        r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -211,7 +210,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SOM + 5,
-        r(rand => RepNetwork.chooseAny(rand, +50))),
+        r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(40),
         beamWeapons.at(50),
@@ -258,7 +257,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COG + 5,
-        r(rand => RepNetwork.chooseAny(rand, +50))),
+        r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(40),
         fray.at(20),
@@ -306,7 +305,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 2,
         Aptitude.INT + 5,
-        r(rand => RepNetwork.chooseAny(rand, +50))),
+        r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         art.anyField(40),
         fray.at(25),
@@ -402,7 +401,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SAV + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.anyField(40),
         art.anyField(30),
@@ -451,7 +450,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 2,
         Aptitude.WIL + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.anyField(30),
         blades.at(30),
@@ -501,7 +500,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SAV + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50)),
+        r(rand => RepNetworks.chooseAny(rand, 50)),
         StartingCredit + 60000),
       skills = List(
         art.anyField(40),
@@ -553,7 +552,7 @@ object BackgroundPackages {
         Moxie + 1,
         StartingCredit + 50000,
         TraitsPositiveEP.patron,
-        r(rand => RepNetwork.chooseAny(rand, 50)),
+        r(rand => RepNetworks.chooseAny(rand, 50)),
         Aptitude.SAV + 5),
       skills = List(
         academics.anyField(40),
@@ -599,7 +598,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 2,
         Aptitude.SOM + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         blades.at(30),
         demolitions.at(30),
@@ -659,7 +658,7 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.COG + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         Skills.chooseAny(30),
         Skills.chooseAny(30),
@@ -714,7 +713,7 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.SAV + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.oneOf("Psychology", "Sociology").at(40),
         art.withField("Digital Art").at(40),
@@ -770,7 +769,7 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.REF + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.anyField(40),
         academics.anyField(40),
@@ -826,7 +825,7 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.COG + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.anyField(40),
         academics.anyField(40),
@@ -999,7 +998,7 @@ object BackgroundPackages {
         Sleights.PsiChi + 2,
         Sleights.PsiGamma + 5,
         Aptitude.WIL + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         blades.at(20),
@@ -1064,7 +1063,7 @@ object BackgroundPackages {
         Sleights.PsiChi + 4,
         Sleights.PsiGamma + 2,
         TraitsNegativeEP.onTheRun,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         fray.at(20),
@@ -1111,7 +1110,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.WIL + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         art.anyField(40),
         fray.at(20),
@@ -1135,7 +1134,7 @@ object BackgroundPackages {
       motivations = List("+Reclaiming Earth", "+Survival", "-TITAN Tech"),
       mods = List(Moxie + 1),
       skills = List(
-        Skills.chooseOnly(40, SkillFilter.Not(Skills.SkillCategory.Psi)),
+        Skills.chooseOnly(40, SkillFilter.Not(SkillCategory.Psi)),
         interfacing.at(15),
         profession.anyField(30))),
     influential = BackgroundPackage(
@@ -1144,7 +1143,7 @@ object BackgroundPackages {
       motivations = List("+Reclaiming Earth", "+Survival", "-TITAN Tech"),
       mods = List(Moxie + 1),
       skills = List(
-        Skills.chooseOnly(50, SkillFilter.Not(Skills.SkillCategory.Psi)),
+        Skills.chooseOnly(50, SkillFilter.Not(SkillCategory.Psi)),
         academics.anyField(20),
         interest.anyField(30),
         interfacing.at(45),
@@ -1159,9 +1158,9 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.INT + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
-        Skills.chooseOnly(50, SkillFilter.Not(Skills.SkillCategory.Psi)),
+        Skills.chooseOnly(50, SkillFilter.Not(SkillCategory.Psi)),
         academics.anyField(40),
         fray.at(20),
         freerunning.at(20),
@@ -1208,7 +1207,7 @@ object BackgroundPackages {
         Moxie + 1,
         TraitsNegativeEP.editedMemories,
         Aptitude.COG + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         Skills.chooseOnly(40, SkillFilter.Not(SkillCategory.Psi)),
         academics.anyField(30),
@@ -1257,7 +1256,7 @@ object BackgroundPackages {
         Moxie + 1,
         TraitsNegativeEP.editedMemories,
         Aptitude.INT + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         Skills.chooseOnly(50, SkillCategory.Combat),
         Skills.chooseOnly(50, SkillCategory.Combat),
@@ -1306,7 +1305,7 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SOM + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         clubs.at(30),
         deception.at(25),
@@ -1361,7 +1360,7 @@ object BackgroundPackages {
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
         TraitsNegativeEP.onTheRun,
         Aptitude.SAV + 5,
-        r(rand => RepNetwork.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.anyField(40),
         Skills.oneOf(climbing, swimming, flight, freerunning).at(50), // TODO technically based on uplift type
@@ -1466,7 +1465,7 @@ object BackgroundPackages {
         Moxie + 1,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
         Aptitude.COG + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         Skills.oneOf(climbing, swimming, flight, freerunning).at(50), // TODO technically based on uplift type

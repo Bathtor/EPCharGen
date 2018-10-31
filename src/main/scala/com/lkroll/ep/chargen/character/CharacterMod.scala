@@ -5,7 +5,7 @@ import com.lkroll.ep.compendium._
 import com.typesafe.scalalogging.LazyLogging
 
 trait CharacterMod {
-  def applyTo(character: Character): Character;
+  def applyTo(character: CharGenCharacter): CharGenCharacter;
   def render: String;
 }
 object CharacterMod extends LazyLogging {
@@ -13,19 +13,19 @@ object CharacterMod extends LazyLogging {
   import CharImplicits.int2mod;
 
   case class Moxie(mod: Int) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       character.copy(moxie = character.moxie + mod)
     }
     override def render: String = s"${int2mod(mod)} Moxie";
   }
   case class GainTrait(egoTrait: EPTrait) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       character.copy(traits = (egoTrait :: character.traits))
     }
     override def render: String = s"Gained trait ${egoTrait.templateTitle}";
   }
   case class GainPsiSleight(sleight: PsiSleight) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       sleight.sleightType match {
         case SleightType.Chi     => character.copy(psiChiSleights = (sleight :: character.psiChiSleights))
         case SleightType.Gamma   => character.copy(psiGammaSleights = (sleight :: character.psiGammaSleights))
@@ -35,19 +35,19 @@ object CharacterMod extends LazyLogging {
     override def render: String = s"Gained ${sleight.templateSubTitle} ${sleight.templateTitle}";
   }
   case object BecomeAsync extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       character.copy(isAsync = true)
     }
     override def render: String = "Became infected with the Watts-MacLeod Strain and developed async abilities.";
   }
   case class GainGear(item: Gear) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
-      character.copy(gear = (item :: character.gear))
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
+      character.copy(gear = (GearEntry(item, 1) :: character.gear))
     }
     override def render: String = s"Gained ${item.templateSubTitle} ${item.templateTitle}";
   }
   case class AptitudeMod(apt: Aptitude, mod: Int) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       val apts = character.aptitudes.base;
       val newApts = apt match {
         case Aptitude.COG => apts.copy(cog = Some(apts.cog.getOrElse(0) + mod))
@@ -64,29 +64,29 @@ object CharacterMod extends LazyLogging {
   }
 
   case class CreditMod(mod: Int) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       character.copy(startingCredit = character.startingCredit + mod)
     }
     override def render: String = s"${int2mod(mod)} starting credit";
   }
 
   case class RepMod(network: Either[RepNetwork, SkillChoice], mod: Int) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       val chosen: RepNetwork = network match {
         case Left(rn) => rn
         case Right(SkillChoice.PickAny(rand)) => {
           if (character.rep.isEmpty) {
-            RepNetwork.list.toArray.randomElement(rand).get
+            RepNetworks.list.toArray.randomElement(rand).get
           } else {
             if (rand.nextBoolean()) {
               character.rep.keys.toArray.randomElement(rand).get
             } else {
-              RepNetwork.list.toArray.randomElement(rand).get
+              RepNetworks.list.toArray.randomElement(rand).get
             }
           }
         }
         case Right(SkillChoice.OneOf(l)) => {
-          val choices = l.flatMap(choice => RepNetwork.list.find(n => n.name.equalsIgnoreCase(choice)));
+          val choices = l.flatMap(choice => RepNetworks.list.find(n => n.name.equalsIgnoreCase(choice)));
           choices.head // one better work
         }
         case Right(_: SkillChoice.PickOnly) => ??? // doesn't make sense here
@@ -105,7 +105,7 @@ object CharacterMod extends LazyLogging {
   }
 
   case class SkillMod(skill: Either[String, SkillChoice], field: Either[Option[String], SkillChoice], mod: Int, specialization: Option[Either[String, SkillChoice]] = None) extends CharacterMod {
-    override def applyTo(character: Character): Character = {
+    override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       require(!character.skills.isEmpty, "Cannot apply SkillMod to empty skill list!");
       val (targets, rest) = skill match {
         case Left(skillName) => {

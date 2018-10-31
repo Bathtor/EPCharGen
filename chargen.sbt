@@ -4,15 +4,18 @@ name := "EP Character Generator"
 
 organization := "com.lkroll.ep"
 
-version := "1.0.0"
+version := "1.1.0-SNAPSHOT"
 
 scalaVersion := "2.12.7"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.17"
+val akkaV = "2.5.17"
+val epcompendiumV = "3.2.0-SNAPSHOT"
+
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % akkaV
+libraryDependencies += "com.typesafe.akka" %% "akka-stream" % akkaV
 libraryDependencies += "com.typesafe.akka" %% "akka-http"   % "10.1.5" 
-libraryDependencies += "com.lkroll.ep" %% "epcompendium-core" % "3.1.0-SNAPSHOT"
-libraryDependencies += "com.lkroll.ep" %% "epcompendium-data" % "3.1.0-SNAPSHOT"
+libraryDependencies += "com.lkroll.ep" %% "epcompendium-core" % epcompendiumV
+libraryDependencies += "com.lkroll.ep" %% "epcompendium-data" % epcompendiumV
 libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.+"
 libraryDependencies += "org.rogach" %% "scallop" % "3.1.+"
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"

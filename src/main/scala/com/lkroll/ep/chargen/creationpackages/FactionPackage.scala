@@ -2,18 +2,19 @@ package com.lkroll.ep.chargen.creationpackages
 
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.character._
-import com.lkroll.ep.compendium.Aptitude
+import com.lkroll.ep.compendium.{ Aptitude, Motivation }
+import com.lkroll.ep.compendium.data.DefaultSkills
 
 case class FactionPackage(
   label:       String,
   level:       PackageLevel,
   motivations: List[Motivation]           = Nil,
   mods:        List[PackageContent]       = Nil,
-  skills:      List[PackageContent.Skill] = Nil) extends Package {
+  skills:      List[PackageContent.Skill] = Nil) extends GroupedPackage {
   override type Self = FactionPackage;
   override def withPrefix(prefix: String): Self = this.copy(label = s"$prefix $label");
   override def ppCost: Int = level.ppCost;
-  override def applyTo(c: Character, rand: Random): Character = {
+  override def applyTo(c: CharGenCharacter, rand: Random): CharGenCharacter = {
     val motivatedChar = c.copy(motivations = c.motivations ++ motivations);
     val moddedChar = mods.foldLeft(motivatedChar) { (acc, mod) =>
       mod match {
@@ -32,9 +33,9 @@ case class FactionPackage(
 object FactionPackages {
   import Implicits.RandomArray;
   import PackageImplicits._;
-  import Skills.Defaults.{ list => skillList, _ }
-  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation };
-  import RepNetwork._;
+  import DefaultSkills.{ list => skillList, _ };
+  import CharImplicits.{ RepNetworkExt, skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation, skilldef2skill };
+  import RepNetworks._;
 
   val anarchist = PackageGroup(
     label = "Anarchist",
@@ -53,7 +54,7 @@ object FactionPackages {
       motivations = List("+Anarchism", "+Community", "+Liberty", "+Morphological Freedom", "–Authority", "–Hypercapitalism"),
       mods = List(
         Moxie + 1,
-        RepNetwork.circleARep + 50),
+        circleARep + 50),
       skills = List(
         academics.withField("Political Science").at(50),
         freeFall.at(30),
@@ -80,7 +81,7 @@ object FactionPackages {
       motivations = List("+Open Source", "+Research", "+Technoprogressivism"),
       mods = List(
         Moxie + 1,
-        RepNetwork.rRep + 50),
+        rRep + 50),
       skills = List(
         academics.anyField(50),
         interest.anyField(30),
@@ -105,7 +106,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Anarchism", "+Barsoomian Movement", "+Community", "+Technoprogressivism", "–Hypercorps"),
-      mods = List(RepNetwork.circleARep + 50),
+      mods = List(circleARep + 50),
       skills = List(
         hardware.anyField(35),
         interest.anyField(40),
@@ -133,7 +134,7 @@ object FactionPackages {
       motivations = List("+Extropianism", "+Hypercapitalism", "+Morphological Freedom"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         freeFall.at(50),
         interest.anyField(40),
@@ -185,7 +186,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Bioconservatism", "+Exhumanism", "+Privacy", "+Religion", "+Solitude", "+Self Reliance"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         freeFall.at(30),
         gunnery.at(20),
@@ -211,7 +212,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Survival", "+Thrill Seeking", "+Wealth", "–Law and Order"),
-      mods = List(RepNetwork.gRep + 50),
+      mods = List(gRep + 50),
       skills = List(
         deception.at(30),
         infiltration.at(30),
@@ -240,7 +241,7 @@ object FactionPackages {
       motivations = List("+Exploration, +Morphological Freedom, +Uplift Rights, –Bioconservatism"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         academics.anyField(20),
@@ -293,8 +294,8 @@ object FactionPackages {
       level = PackageLevel.Influential,
       motivations = List("+Extropianism", "+Morphological Freedom", "+Personal Development", "–Bioconservativism"),
       mods = List(
-        RepNetwork.circleARep + 50,
-        RepNetwork.cRep + 50),
+        circleARep + 50,
+        cRep + 50),
       skills = List(
         freeFall.at(20),
         interest.withField("Cutting-Edge Technology").at(40),
@@ -322,7 +323,7 @@ object FactionPackages {
       motivations = List("+Hypercapitalism", "+Stability", "+Wealth", "–Anarchism", "–AGI Rights", "–Uplift Rights"),
       mods = List(
         Moxie + 1,
-        RepNetwork.cRep + 50),
+        cRep + 50),
       skills = List(
         academics.withField("Economics").at(50),
         interfacing.at(40),
@@ -349,7 +350,7 @@ object FactionPackages {
       motivations = List("+Bioconservatism", "+Jovian Republic", "–AGI Rights", "–Transhumanism", "–Uplift Rights"),
       mods = List(
         Moxie + 1,
-        RepNetwork.cRep + 50),
+        cRep + 50),
       skills = List(
         academics.withField("Military Science").at(30),
         intimidation.at(25),
@@ -377,7 +378,7 @@ object FactionPackages {
       motivations = List("+Bioconservatism", "+Hypercapitalism", "+Preserving Traditions", "+Reclaiming Earth"),
       mods = List(
         Moxie + 1,
-        RepNetwork.cRep + 50),
+        cRep + 50),
       skills = List(
         academics.withField("Pre-Fall History").at(50),
         art.anyField(40),
@@ -404,7 +405,7 @@ object FactionPackages {
       motivations = List("+AGI Rights", "+Mercurial Cause", "–Assimilation", "–Bioconservatism", "–Sapient Cause"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         Skills.chooseAny(50),
         interest.withField("Infolife Clades").at(50),
@@ -432,7 +433,7 @@ object FactionPackages {
       motivations = List("+Mercurial Cause", "+Uplift Rights", "–Assimilation", "–Bioconservatism", "–Sapient Cause"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         Skills.chooseAny(50),
         interest.withField("Uplift Clades").at(50),
@@ -458,7 +459,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Exploration", "+Nano-ecology", "+Research", "+Technoprogressivism"),
-      mods = List(RepNetwork.eRep + 50),
+      mods = List(eRep + 50),
       skills = List(
         academics.withField("Ecology").at(40),
         academics.withField("Nanotechnology").at(50),
@@ -486,7 +487,7 @@ object FactionPackages {
       motivations = List("+Bioconservatism", "+Precautionism", "+Reclaiming Earth", "–AGI Rights"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         clubs.at(20),
         freeFall.at(35),
@@ -514,7 +515,7 @@ object FactionPackages {
       motivations = List("+AGI Rights", "+Exploration", "+Morphological Freedom", "+Research"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         freeFall.at(30),
         infosec.at(20),
@@ -542,7 +543,7 @@ object FactionPackages {
       motivations = List("+Precautionism", "+Reclaiming Earth", "–Bioconservatism", "–Technoprogressivism"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -568,7 +569,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Environmentalism", "+Preservationism", "+Research", "–Gatecrashing", "–Nano-ecology"),
-      mods = List(RepNetwork.eRep + 50),
+      mods = List(eRep + 50),
       skills = List(
         academics.withField("Ecology").at(50),
         art.anyField(30),
@@ -594,7 +595,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Bioconservatism", "+Reclaiming Earth", "–AGI Rights"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         demolitions.at(20),
         freerunning.at(30),
@@ -621,7 +622,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Exploration", "+Morphological Freedom", "+Personal Development", "+Research"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(50),
         beamWeapons.at(25),
@@ -647,7 +648,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+AGI Rights", "+Sapient Cause", "+Uplift Rights", "–Bioconservatism"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         interest.anyField(50),
         interest.anyField(40),
@@ -675,7 +676,7 @@ object FactionPackages {
       motivations = List("+Anarchism", "+Hedonism", "+Individualism", "+Morphological Freedom"),
       mods = List(
         Moxie + 1,
-        RepNetwork.circleARep + 50),
+        circleARep + 50),
       skills = List(
         art.anyField(50),
         freeFall.at(40),
@@ -702,7 +703,7 @@ object FactionPackages {
       motivations = List("+Hard Work", "+Mercurian Independence", "–Hypercapitalism"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         climbing.at(25),
         interest.anyField(40),
@@ -754,7 +755,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Hard Work", "+Independence", "+Thrill Seeking"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         flight.at(40),
         gunnery.at(30),
@@ -780,7 +781,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Artistic Expression", "+Fame", "+Hypercapitalism", "+Wealth", "–Anarchism"),
-      mods = List(RepNetwork.fRep + 50),
+      mods = List(fRep + 50),
       skills = List(
         art.anyField(40),
         deception.at(25),
@@ -807,7 +808,7 @@ object FactionPackages {
       motivations = List("+Exploration", "+Morphological Freedom", "+Personal Development", "+Research"),
       mods = List(
         Moxie + 2,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         flight.at(50),
         interest.anyField(50),
@@ -832,7 +833,7 @@ object FactionPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Research", "+Technosocialism", "–Bioconservatism", "–Hypercapitalism"),
-      mods = List(RepNetwork.circleARep + 50),
+      mods = List(circleARep + 50),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -859,8 +860,8 @@ object FactionPackages {
       level = PackageLevel.Influential,
       motivations = List("+Hypercapitalism", "+Personal Development", "+Ultimates", "–Bioconservatism"),
       mods = List(
-        RepNetwork.cRep + 50,
-        RepNetwork.uRep + 50),
+        cRep + 50,
+        uRep + 50),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -888,7 +889,7 @@ object FactionPackages {
       motivations = List("+Hypercapitalism", "+Personal Development", "+Uplift Rights"),
       mods = List(
         Moxie + 1,
-        RepNetwork.cRep + 50),
+        cRep + 50),
       skills = List(
         academics.anyField(50),
         beamWeapons.at(25),

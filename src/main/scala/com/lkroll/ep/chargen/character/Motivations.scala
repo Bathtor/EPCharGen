@@ -2,17 +2,11 @@ package com.lkroll.ep.chargen.character
 
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.utils._
+import com.lkroll.ep.compendium.{ Motivation, MotivationKind }
 import com.typesafe.scalalogging.StrictLogging
 
-case class Motivation(kind: MotivationKind, descr: String) {
-  def rendered: String = kind match {
-    case MotivationKind.Like    => s"+$descr"
-    case MotivationKind.Dislike => s"-$descr"
-    case MotivationKind.Either  => s"+/-$descr"
-  }
-}
-object Motivation extends StrictLogging {
-  import fastparse.all._
+object MotivationParser extends StrictLogging {
+  import fastparse.all._;
 
   lazy val motParser: P[Motivation] = P(kindParser ~/ ws.rep ~ nameParser).map{ case (kind, s) => Motivation(kind, s) };
   lazy val kindParser: P[MotivationKind] = P(eitherParser | likeParser | dislikeParser);
@@ -31,12 +25,6 @@ object Motivation extends StrictLogging {
       }
     }
   }
-}
-sealed trait MotivationKind;
-object MotivationKind {
-  case object Like extends MotivationKind
-  case object Dislike extends MotivationKind
-  case object Either extends MotivationKind
 }
 
 object Motivations extends Table {

@@ -2,19 +2,20 @@ package com.lkroll.ep.chargen.creationpackages
 
 import com.lkroll.ep.chargen.Random
 import com.lkroll.ep.chargen.character._
-import com.lkroll.ep.compendium.Aptitude
-import com.lkroll.ep.compendium.data.{ Disorders => DisorderData, _ }
+import com.lkroll.ep.compendium.{ Aptitude, Motivation }
+import com.lkroll.ep.compendium.data.{ DefaultSkills, Disorders => DisorderData, _ }
+import com.lkroll.common.macros.Macros
 
 case class FocusPackage(
   label:       String,
   level:       PackageLevel,
   motivations: List[Motivation]           = Nil,
   mods:        List[PackageContent]       = Nil,
-  skills:      List[PackageContent.Skill] = Nil) extends Package {
+  skills:      List[PackageContent.Skill] = Nil) extends GroupedPackage {
   override type Self = FocusPackage;
   override def withPrefix(prefix: String): Self = this.copy(label = s"$prefix $label");
   override def ppCost: Int = level.ppCost;
-  override def applyTo(c: Character, rand: Random): Character = {
+  override def applyTo(c: CharGenCharacter, rand: Random): CharGenCharacter = {
     val motivatedChar = c.copy(motivations = c.motivations ++ motivations);
     val moddedChar = mods.foldLeft(motivatedChar) { (acc, mod) =>
       mod match {
@@ -31,9 +32,9 @@ case class FocusPackage(
 
 object FocusPackages {
   import PackageImplicits._;
-  import Skills.Defaults.{ list => skillList, _ }
-  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation };
-  import RepNetwork._;
+  import DefaultSkills.{ list => skillList, _ };
+  import CharImplicits.{ RepNetworkExt, skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation, skilldef2skill };
+  import RepNetworks._;
 
   val academic = PackageGroup(
     label = "Academic",
@@ -50,7 +51,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Education", "+Open Source", "+Personal Career", "+Personal Development"),
-      mods = List(RepNetwork.rRep + 50),
+      mods = List(rRep + 50),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -65,7 +66,7 @@ object FocusPackages {
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Education", "+Open Source", "+Personal Career", "+Personal Development"),
-      mods = List(Aptitude.COG + 5, RepNetwork.rRep + 50),
+      mods = List(Aptitude.COG + 5, rRep + 50),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -96,7 +97,7 @@ object FocusPackages {
       motivations = List("+Bioconservatism", "+Mercurial Cause", "+Privacy", "+Terraforming", "+Venusian Sovereignty"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(30),
         fray.at(20),
@@ -115,7 +116,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SAV + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(30),
         fray.at(20),
@@ -147,7 +148,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Personal Career", "+Privacy", "+Survival"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         blades.at(25),
         fray.at(30),
@@ -161,7 +162,7 @@ object FocusPackages {
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Personal Career", "+Privacy", "+Survival"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         art.anyField(30),
         blades.at(35),
@@ -192,7 +193,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Duty", "+Privacy", "+Survival"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         beamWeapons.at(30),
         fray.at(30),
@@ -208,7 +209,7 @@ object FocusPackages {
       motivations = List("+Duty", "+Privacy", "+Survival"),
       mods = List(
         Aptitude.REF + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         beamWeapons.at(30),
         fray.at(30),
@@ -238,7 +239,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+DIY", "+Maker Movement", "+Thrill Seeking"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(30),
         flight.at(40),
@@ -255,7 +256,7 @@ object FocusPackages {
       motivations = List("+DIY", "+Maker Movement", "+Thrill Seeking"),
       mods = List(
         Aptitude.REF + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(30),
         flight.at(50),
@@ -295,7 +296,7 @@ object FocusPackages {
         rpc(Disorders.roll(_)),
         rpc(Disorders.roll(_)),
         Sleights + 4,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         fray.at(20),
         infiltration.at(30),
@@ -315,7 +316,7 @@ object FocusPackages {
         rpc(Disorders.roll(_)),
         rpc(Disorders.roll(_)),
         Sleights + 8,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(30),
         control.at(30),
@@ -345,7 +346,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Privacy", "+Survival", "+Vice"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         deception.at(50),
         disguise.at(30),
@@ -362,7 +363,7 @@ object FocusPackages {
       motivations = List("+Privacy", "+Survival", "+Vice"),
       mods = List(
         Aptitude.SAV + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Psychology").at(40),
         deception.at(50),
@@ -402,7 +403,7 @@ object FocusPackages {
         rpc(Disorders.roll(_)),
         rpc(Disorders.roll(_)),
         Sleights + 4,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Psychology").at(40),
         control.at(50),
@@ -422,7 +423,7 @@ object FocusPackages {
         rpc(Disorders.roll(_)),
         Sleights + 6,
         Aptitude.WIL + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Psychology").at(40),
         control.at(50),
@@ -451,7 +452,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Explosions", "+Survival", "–TITAN Tech"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         blades.at(20),
         demolitions.at(25),
@@ -468,7 +469,7 @@ object FocusPackages {
       motivations = List("+Explosions", "+Survival", "–TITAN Tech"),
       mods = List(
         Aptitude.COO + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         blades.at(30),
         climbing.at(30),
@@ -499,7 +500,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Hard Work", "+Hypercapitalism", "+Personal Career"),
-      mods = List(r(RepNetwork.chooseAny(_, 50))),
+      mods = List(r(RepNetworks.chooseAny(_, 50))),
       skills = List(
         beamWeapons.at(20),
         deception.at(25),
@@ -514,7 +515,7 @@ object FocusPackages {
       level = PackageLevel.Formative,
       motivations = List("+Hard Work", "+Hypercapitalism", "+Personal Career"),
       mods = List(
-        r(RepNetwork.chooseAny(_, 100)),
+        r(RepNetworks.chooseAny(_, 100)),
         Aptitude.SAV + 5),
       skills = List(
         academics.withField("Economics").at(30),
@@ -546,7 +547,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Justice", "+Self Reliance", "+The Hunt"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         infosec.at(15),
         investigation.at(30),
@@ -563,7 +564,7 @@ object FocusPackages {
       motivations = List("+Justice", "+Self Reliance", "+The Hunt"),
       mods = List(
         Aptitude.INT + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         fray.at(25),
         infosec.at(30),
@@ -594,7 +595,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Cartel Growth", "+Fascism", "+Self Reliance", "+Stability"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         clubs.at(30),
         fray.at(20),
@@ -611,7 +612,7 @@ object FocusPackages {
       motivations = List("+Cartel Growth", "+Fascism", "+Self Reliance", "+Stability"),
       mods = List(
         Aptitude.SOM + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         clubs.at(30),
         fray.at(20),
@@ -644,7 +645,7 @@ object FocusPackages {
       motivations = List("+Alien Contact", "+Education", "+Exploration", "+Survival"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         climbing.at(30),
@@ -662,7 +663,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SOM + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         climbing.at(40),
@@ -693,7 +694,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Fame", "+Hedonism", "+Personal Career", "+Thrill Seeking"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         deception.at(35),
         kinesics.at(30),
@@ -710,7 +711,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SAV + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Psychology").at(30),
         deception.at(40),
@@ -741,7 +742,7 @@ object FocusPackages {
       motivations = List("+Artistic Expression", "+Morphological Freedom", "+Research", "+Science!", "+Uplift Rights"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Genetics").at(50),
         academics.anyField(40),
@@ -758,7 +759,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COG + 5,
-        RepNetwork.rRep + 50),
+        rRep + 50),
       skills = List(
         academics.withField("Genetics").at(50),
         academics.anyField(40),
@@ -788,7 +789,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Fame", "+Open Source", "+Owning Systems", "+Thrill Seeking", "–Hackers"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.oneOf("Computer Science", "Cryptography").at(40),
         hardware.withField("Electronics").at(15),
@@ -805,7 +806,7 @@ object FocusPackages {
       motivations = List("+Fame", "+Open Source", "+Owning Systems", "+Thrill Seeking", "–Hackers"),
       mods = List(
         Aptitude.COG + 5,
-        RepNetwork.gRep + 50),
+        gRep + 50),
       skills = List(
         academics.withField("Computer Science").at(40),
         academics.withField("Cryptography").at(40),
@@ -836,7 +837,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Art", "+Fame", "+Hedonism", "+Personal Career", "+Thrill Seeking"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         art.anyField(50),
         disguise.at(30),
@@ -853,8 +854,8 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SAV + 5,
-        RepNetwork.fRep + 50,
-        r(RepNetwork.chooseAny(_, +50))),
+        fRep + 50,
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         art.anyField(50),
         art.anyField(30),
@@ -885,7 +886,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Self Reliance", "+The Hunt"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         infosec.at(40),
         investigation.at(50),
@@ -901,7 +902,7 @@ object FocusPackages {
       motivations = List("+Self Reliance", "+The Hunt"),
       mods = List(
         Aptitude.INT + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         fray.at(20),
         infosec.at(30),
@@ -933,7 +934,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Sousveillance", "+Transparency", "–Censorship"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         art.withField("Performance").at(40),
         intimidation.at(20),
@@ -949,7 +950,7 @@ object FocusPackages {
       motivations = List("+Sousveillance", "+Transparency", "–Censorship"),
       mods = List(
         Aptitude.SAV + 5,
-        r(RepNetwork.chooseAny(_, +100))),
+        r(RepNetworks.chooseAny(_, +100))),
       skills = List(
         academics.anyField(30),
         art.withField("Performance").at(40),
@@ -982,7 +983,7 @@ object FocusPackages {
       motivations = List("+Helping Others", "–Violence"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         hardware.withField("Implants").at(25),
@@ -999,7 +1000,7 @@ object FocusPackages {
       mods = List(
         Moxie + 2,
         Aptitude.COG + 5,
-        RepNetwork.rRep + 50),
+        rRep + 50),
       skills = List(
         academics.anyField(40),
         academics.anyField(30),
@@ -1031,7 +1032,7 @@ object FocusPackages {
       motivations = List("+Survival", "+Thrill Seeking", "+Wealth", "–Authority"),
       mods = List(
         Moxie + 1,
-        RepNetwork.gRep + 50),
+        gRep + 50),
       skills = List(
         fray.at(20),
         gunnery.at(20),
@@ -1050,7 +1051,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COO + 5,
-        RepNetwork.gRep + 50),
+        gRep + 50),
       skills = List(
         art.anyField(30),
         fray.at(20),
@@ -1082,7 +1083,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Helping Others", "+Neurodiversity", "–Madness"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Psychology").at(50),
         kinesics.at(30),
@@ -1099,7 +1100,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COG + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Psychology").at(50),
         academics.anyField(30),
@@ -1134,7 +1135,7 @@ object FocusPackages {
       motivations = List("+Introspection", "+Neurodiversity", "+Personal Development", "+Self Control"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50)),
+        r(RepNetworks.chooseAny(_, +50)),
         CharacterMod.BecomeAsync,
         TraitsPositiveEP.psi1,
         rpc(Disorders.roll(_)),
@@ -1154,7 +1155,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COG + 5,
-        r(RepNetwork.chooseAny(_, +50)),
+        r(RepNetworks.chooseAny(_, +50)),
         CharacterMod.BecomeAsync,
         TraitsPositiveEP.psi1,
         rpc(Disorders.roll(_)),
@@ -1192,7 +1193,7 @@ object FocusPackages {
       level = PackageLevel.Influential,
       motivations = List("+Exploration", "+Neurodiversity", "+Personal Development", "+Self Control"),
       mods = List(
-        r(RepNetwork.chooseAny(_, +50)),
+        r(RepNetworks.chooseAny(_, +50)),
         CharacterMod.BecomeAsync,
         TraitsPositiveEP.psi2,
         rpc(Disorders.roll(_)),
@@ -1212,7 +1213,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.INT + 5,
-        r(RepNetwork.chooseAny(_, +50)),
+        r(RepNetworks.chooseAny(_, +50)),
         CharacterMod.BecomeAsync,
         TraitsPositiveEP.psi2,
         rpc(Disorders.roll(_)),
@@ -1245,7 +1246,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Survival", "+Wealth", "–Authority"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         art.withField("Sculpture").at(40),
         hardware.anyField(40),
@@ -1261,7 +1262,7 @@ object FocusPackages {
       mods = List(
         Moxie + 2,
         Aptitude.COG + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(25),
         art.withField("Sculpture").at(40),
@@ -1291,7 +1292,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Research", "+Science!", "+Technoprogressivism", "–Bioconservatism"),
-      mods = List(RepNetwork.rRep + 50),
+      mods = List(rRep + 50),
       skills = List(
         academics.anyField(50),
         academics.anyField(30),
@@ -1308,7 +1309,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COG + 5,
-        RepNetwork.rRep + 50),
+        rRep + 50),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -1340,7 +1341,7 @@ object FocusPackages {
       motivations = List("+Nano-ecology", "+Research", "+Uplift Rights"),
       mods = List(
         Moxie + 1,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Zoology").at(40),
         animalHandling.at(50),
@@ -1357,7 +1358,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.INT + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Zoology").at(40),
         academics.anyField(30),
@@ -1387,7 +1388,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Personal Career", "+Survival", "+Wealth", "–Authority"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         deception.at(40),
         interest.withField("Black Markets").at(40),
@@ -1404,7 +1405,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.INT + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(30),
         deception.at(40),
@@ -1434,7 +1435,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Duty", "+Personal Development", "+Survival", "+Victory", "–Peace"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         climbing.at(25),
         fray.at(20),
@@ -1452,7 +1453,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SOM + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         blades.at(30),
         climbing.at(40),
@@ -1482,7 +1483,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Secret Identity", "–Secrets"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Cryptography").at(40),
         deception.at(50),
@@ -1499,7 +1500,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.SAV + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.withField("Cryptography").at(40),
         deception.at(50),
@@ -1528,7 +1529,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+DIY", "+Education", "+Science!", "+Sousveillance", "+Technoprogressivism"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         hardware.anyField(50),
@@ -1546,7 +1547,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COG + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         fray.at(15),
@@ -1576,7 +1577,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Wealth"),
-      mods = List(RepNetwork.gRep + 50),
+      mods = List(gRep + 50),
       skills = List(
         climbing.at(25),
         fray.at(20),
@@ -1594,7 +1595,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COO + 5,
-        RepNetwork.gRep + 50),
+        gRep + 50),
       skills = List(
         art.anyField(30),
         blades.at(20),
@@ -1624,7 +1625,7 @@ object FocusPackages {
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Explosions", "+Survival", "–TITANs"),
-      mods = List(r(RepNetwork.chooseAny(_, +50))),
+      mods = List(r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         demolitions.at(40),
         fray.at(25),
@@ -1641,7 +1642,7 @@ object FocusPackages {
       mods = List(
         Moxie + 1,
         Aptitude.COO + 5,
-        r(RepNetwork.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         demolitions.at(40),
         fray.at(40),
@@ -1655,4 +1656,6 @@ object FocusPackages {
         profession.withField("Squad Tactics").at(40),
         seekerWeapons.at(50),
         throwingWeapons.at(30))));
+
+  val list: List[ThreePackageGroup[FocusPackage]] = Macros.memberList[ThreePackageGroup[FocusPackage]];
 }

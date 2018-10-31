@@ -1,13 +1,13 @@
 package com.lkroll.ep.chargen
 
-import com.lkroll.ep.chargen.character.{ Character, Skill }
+import com.lkroll.ep.chargen.character.{ CharGenCharacter, Skill }
 import com.lkroll.ep.chargen.rendering.Renderer
 
 trait StageResult {
   def render(renderer: Renderer): Unit;
 }
 
-case class CreationResult(character: Character, stages: List[StageResult]) {
+case class CreationResult(character: CharGenCharacter, stages: List[StageResult]) {
   def render(renderer: Renderer): Unit = {
     renderer.beginCharacter(character.name);
     character.render(renderer);

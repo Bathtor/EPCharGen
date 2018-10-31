@@ -3,11 +3,17 @@ package com.lkroll.ep.chargen.creationpackages
 import com.lkroll.ep.chargen.character._
 import com.lkroll.ep.chargen.Random
 
-trait Package {
+trait GeneralPackage {
+  def label: String;
+  def applyTo(c: CharGenCharacter, rand: Random): CharGenCharacter;
+}
+
+trait PPPackage extends GeneralPackage {
+  def ppCost: Int;
+}
+
+trait GroupedPackage extends PPPackage {
   type Self;
 
-  def label: String;
   def withPrefix(prefix: String): Self;
-  def ppCost: Int;
-  def applyTo(c: Character, rand: Random): Character;
 }

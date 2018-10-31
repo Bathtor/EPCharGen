@@ -1,10 +1,11 @@
 package com.lkroll.ep.chargen.lifepath
 
 import com.lkroll.ep.chargen._
-import com.lkroll.ep.chargen.character.{ Skills, GenderIdentity, RepNetwork, MorphInstantiation }
+import com.lkroll.ep.chargen.character.{ CharImplicits, Skills, MorphInstantiation, RepNetworks }
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ MorphModel, MorphInstance }
+import com.lkroll.ep.compendium.{ Aptitudes, GenderIdentity, MorphModel, MorphInstance, RepNetwork }
+import com.lkroll.ep.compendium.data.DefaultSkills
 
 trait PathIndex {
   def tableIndex: Int;
@@ -19,7 +20,13 @@ object FirewallOption {
 
 class LifePathCreation(
   val fair:     Boolean        = true,
-  val firewall: FirewallOption = FirewallOption.Skip) extends CreationSystem {
+  val firewall: FirewallOption = FirewallOption.Skip,
+  val gear:     Boolean        = false,
+  val moxie:    Boolean        = true) extends CreationSystem {
+
+  import CharImplicits.skilldef2skill;
+  import Implicits.RandomArray;
+
   override def label: String = "Life Path"
   override def randomCharacter(rand: Random): CreationResult = {
     var stages: List[StageResult] = List(SystemResult(this));
@@ -32,7 +39,7 @@ class LifePathCreation(
 
     var skills: List[character.Skill] = List(nativeLang);
 
-    var allPackages: List[Package] = Nil;
+    var allPackages: List[PPPackage] = Nil;
 
     val childhood = YouthPathTable.roll(rand);
     stages ::= Stages.YouthPathTable(childhood);
@@ -80,10 +87,10 @@ class LifePathCreation(
     }
     allPackages ++= backgroundPackages;
 
-    var char = character.Character(
+    var char = character.CharGenCharacter(
       name = "Anonymous",
       gender = genderId,
-      aptitudes = character.Aptitudes(base = apts.aptitudes, morphBoni = currentMorph.aptitudeBonus, morphMax = currentMorph.aptitudeMax),
+      aptitudes = Aptitudes(base = apts.aptitudes, morphBoni = currentMorph.aptitudeBonus, morphMax = currentMorph.aptitudeMax),
       skills = skills,
       background = background,
       startingMorph = startingMorph,
@@ -120,7 +127,7 @@ class LifePathCreation(
         case _                                  => () // apply later
       }
       stages ::= Stages.PreFallAdultPath(adultPath);
-      val adultPackage: Package = adultPath.pkg.left.map(_.basicPackage).merge;
+      val adultPackage: PPPackage = adultPath.pkg.left.map(_.basicPackage).merge;
       allPackages ::= adultPackage;
       char = adultPackage.applyTo(char, rand);
       stages ::= Stages.PreFallLifeEvent(lifeEvent);
@@ -154,7 +161,7 @@ class LifePathCreation(
     val postFallTable = PostFallPathTable.withFallPackages(char.isAGI, char.isUplift, preFallPath, fallFocus, fallFaction)
     val postFallPath = postFallTable.roll(rand);
     stages ::= Stages.PostFallAdultPath(postFallPath);
-    val adultPackage: Package = postFallPath.adultPath.pkg.left.map(_.ofLevel(postFallPath.distribution.focus).get).merge;
+    val adultPackage: PPPackage = postFallPath.adultPath.pkg.left.map(_.ofLevel(postFallPath.distribution.focus).get).merge;
     allPackages ::= adultPackage;
     char = adultPackage.applyTo(char, rand);
     val factionPackage = postFallPath.factionPath.pkg.ofLevel(postFallPath.distribution.faction).get;
@@ -163,7 +170,7 @@ class LifePathCreation(
     val faction = s"${postFallPath.factionPath.pkg.label} (${postFallPath.factionPath.label})";
     char = char.copy(faction = faction);
 
-    var extraPackages: List[Package] = Nil;
+    var extraPackages: List[PPPackage] = Nil;
     val postFallEvent = PostFallEvent.roll(rand);
     postFallEvent.effects.foreach {
       case PostFallEventEffect.ExtraPackage(pkg) => {
@@ -195,13 +202,13 @@ class LifePathCreation(
     };
     history ::= postFallEvent.descr;
 
-    val hasIRep = char.rep.getOrElse(RepNetwork.iRep, 0) > 0;
-    val hasNetFirewall = char.skills.find(s => Skills.Defaults.networking.name == s.name && s.field.get == "Firewall").isDefined;
+    val hasIRep = char.rep.getOrElse(RepNetworks.iRep, 0) > 0;
+    val hasNetFirewall = char.skills.find(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall").isDefined;
     firewall match {
       case FirewallOption.Allow => {
         if (hasIRep || hasNetFirewall) {
           if (!hasIRep) {
-            char = char.copy(rep = char.rep + (RepNetwork.iRep -> 5)); // Firewall chars should have at least 5 i-Rep
+            char = char.copy(rep = char.rep + (RepNetworks.iRep -> 5)); // Firewall chars should have at least 5 i-Rep
           }
           val firewallEvent = FirewallEvent.roll(rand);
           stages ::= Stages.FirewallEvent(firewallEvent);
@@ -216,7 +223,7 @@ class LifePathCreation(
       }
       case FirewallOption.Always => {
         if (!hasIRep) {
-          char = char.copy(rep = char.rep + (RepNetwork.iRep -> 5)); // Firewall chars should have at least 5 i-Rep
+          char = char.copy(rep = char.rep + (RepNetworks.iRep -> 5)); // Firewall chars should have at least 5 i-Rep
         }
         val firewallEvent = FirewallEvent.roll(rand);
         stages ::= Stages.FirewallEvent(firewallEvent);
@@ -230,31 +237,52 @@ class LifePathCreation(
       case FirewallOption.Skip => {
         import Implicits.RandomArray;
         if (hasIRep) {
-          val points = char.rep(RepNetwork.iRep);
-          val picked = RepNetwork.list.filter(n => n != RepNetwork.iRep).toArray.randomElement(rand).get;
+          val points = char.rep(RepNetworks.iRep);
+          val picked = RepNetworks.list.filter(n => n != RepNetworks.iRep).toArray.randomElement(rand).get;
           val updated = char.rep.getOrElse(picked, 0) + points;
           var newRep = char.rep;
-          newRep -= RepNetwork.iRep;
+          newRep -= RepNetworks.iRep;
           newRep += (picked -> updated);
           char = char.copy(rep = newRep)
         }
         if (hasNetFirewall) {
-          val (netFire, rest) = char.skills.partition(s => Skills.Defaults.networking.name == s.name && s.field.get == "Firewall");
+          val (netFire, rest) = char.skills.partition(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall");
           val ranks = netFire.map(_.ranks).sum;
-          val picked = Skills.Defaults.networking.sampleFields.get.filterNot(_ == "Firewall").randomElement(rand).get;
-          val skill = Skills.Defaults.networking.withField(picked).instance(ranks);
+          val picked = DefaultSkills.networking.sampleFields.get.toArray.filterNot(_ == "Firewall").randomElement(rand).get;
+          val skill = DefaultSkills.networking.withField(picked).instance(ranks);
           char = char.copy(skills = skill :: rest);
         }
       }
     }
 
-    val startingCredit = StartingCreditTable.roll(rand);
-    stages ::= Stages.Gear(Right(startingCredit));
-    char = char.copy(startingCredit = Math.max(0, char.startingCredit + startingCredit));
-
-    val combinationResult = character.CombineEverything(rand, char);
-    stages ::= Stages.CombineEverything(combinationResult);
+    // Needs to happen before gear selection to make requirements work properly
+    val combinationResult = character.CombineEverything(rand, char, moxie);
     char = combinationResult.char;
+
+    val startingCredit = StartingCreditTable.roll(rand);
+    if (gear) {
+      var remainingCredit = startingCredit + char.startingCredit;
+      var availablePacks = GearPackages.list.toArray.filter(p =>
+        p.usableBy(char) && (p.creditCost <= remainingCredit));
+      var gearPacks: List[GearPackage] = Nil;
+      while (!availablePacks.isEmpty) {
+        val pack = availablePacks.randomElement(rand).get;
+        remainingCredit -= pack.creditCost;
+        availablePacks = availablePacks.filter(p =>
+          (p.label != pack.label) && (p.creditCost <= remainingCredit));
+        gearPacks ::= pack;
+      }
+      remainingCredit = Math.max(0, remainingCredit);
+      stages ::= Stages.Gear(Left((remainingCredit, gearPacks)));
+      char = gearPacks.foldLeft(char.copy(startingCredit = remainingCredit)) { (acc, gp) =>
+        gp.applyTo(acc, rand)
+      };
+    } else {
+      stages ::= Stages.Gear(Right(startingCredit));
+      char = char.copy(startingCredit = Math.max(0, char.startingCredit + startingCredit));
+    }
+
+    stages ::= Stages.CombineEverything(combinationResult);
 
     val storyEvent = StoryEvent.roll(rand);
     stages ::= Stages.StoryEvent(storyEvent);
@@ -263,13 +291,13 @@ class LifePathCreation(
     CreationResult(char.copy(history = history.reverse), stages.reverse)
   }
 
-  private val normalGenderTable: RollTable[GenderIdentity.GenderIdentity] = RollTable(
+  private val normalGenderTable: RollTable[GenderIdentity] = RollTable(
     (1 to 45) -> GenderIdentity.Male,
     (46 to 90) -> GenderIdentity.Female,
     (91 to 93) -> GenderIdentity.Genderless,
     (94 to 100) -> GenderIdentity.Other);
 
-  private val agiGenderTable: RollTable[GenderIdentity.GenderIdentity] = RollTable(
+  private val agiGenderTable: RollTable[GenderIdentity] = RollTable(
     (1 to 10) -> GenderIdentity.Male,
     (11 to 20) -> GenderIdentity.Female,
     (21 to 80) -> GenderIdentity.Genderless,
@@ -279,7 +307,6 @@ class LifePathCreation(
 
 object Stages {
   import rendering.Renderer
-  import Implicits.AptitudesRendering
 
   case class AptitudeTable(result: character.AptitudeTemplate) extends StageResult {
     def render(renderer: Renderer): Unit = {
@@ -417,7 +444,7 @@ object Stages {
       renderer.labelled("Faction Package", result.factionPath.pkg.ofLevel(result.distribution.faction).get.label);
     }
   }
-  case class FinalPackages(result: List[Package], ppTotal: Int) extends StageResult {
+  case class FinalPackages(result: List[PPPackage], ppTotal: Int) extends StageResult {
     def render(renderer: Renderer): Unit = {
       renderer.stage("Step 10: Final Packages");
       renderer.value(s"Added ${result.size} packages.");
@@ -428,11 +455,14 @@ object Stages {
     }
   }
 
-  case class Gear(result: Either[List[com.lkroll.ep.compendium.Gear], Int]) extends StageResult {
+  case class Gear(result: Either[(Int, List[GearPackage]), Int]) extends StageResult {
     def render(renderer: Renderer): Unit = {
       renderer.stage("Step 13: Gear");
       result match {
-        case Left(gear)            => ???
+        case Left((startingCredit, gear)) => {
+          renderer.labelled("Starting Credit", startingCredit.toString());
+          renderer.list(gear.map(gp => s"${gp.label} (${gp.creditCost} credits)"))
+        }
         case Right(startingCredit) => renderer.labelled("Starting Credit", startingCredit.toString())
       }
     }

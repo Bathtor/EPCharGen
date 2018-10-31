@@ -9,7 +9,7 @@ import Implicits.{ RandomArray, int2opt, str2opt };
 
 class MorphInstantiation(
   val model:    MorphModel,
-  val genderId: GenderIdentity.GenderIdentity) extends Table {
+  val genderId: GenderIdentity) extends Table {
   import MorphInstantiation._;
   override type Result = MorphInstance;
 
@@ -178,7 +178,7 @@ $appearance""",
 }
 
 object MorphInstantiation {
-  def forModel(morph: MorphModel, genderIdentity: GenderIdentity.GenderIdentity): MorphInstantiation = new MorphInstantiation(morph, genderIdentity);
+  def forModel(morph: MorphModel, genderIdentity: GenderIdentity): MorphInstantiation = new MorphInstantiation(morph, genderIdentity);
 
   val eyeColourData: RollTableLike[String] = RollTable(
     (1 to 10) -> "amber",

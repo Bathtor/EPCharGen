@@ -1,6 +1,7 @@
 package com.lkroll.ep.chargen.names
 
-import com.lkroll.ep.chargen.character.{ Language, Languages }
+import com.lkroll.ep.compendium.Language
+import com.lkroll.ep.compendium.data.Languages
 
 object NameUsageCode extends Enumeration {
   type NameUsageCode = Value;

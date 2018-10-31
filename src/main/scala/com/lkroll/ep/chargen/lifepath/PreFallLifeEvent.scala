@@ -28,7 +28,7 @@ object PreFallLifeEventEffect {
 object PreFallLifeEvent extends Table {
   import Implicits.RandomArray
   import CharImplicits._;
-  import Skills.Defaults._;
+  import DefaultSkills._;
   import PackageImplicits.{ Moxie, StartingCredit, morphT2filter };
 
   override type Result = PreFallLifeEventResult;
@@ -117,7 +117,7 @@ object PreFallLifeEvent extends Table {
     (67 to 68) -> CharMod("The poor state of affairs on Earth before the Fall impacts you heavily.", TraitsNegativeEP.mentalDisorder.copy(name = "Mental Disorder (Depression)")),
     (69 to 70) -> CharMod("You spend some time in some of the rougher, crisis-impacted areas on Earth before the Fall.", fray + 10),
     (71 to 72) -> CharMod("A period of poverty leaves you with the skills to get by.", scrounging + 10),
-    (73 to 74) -> CharMod("You are implicated in a news-making scandal", RepNetwork.cRep - 10),
+    (73 to 74) -> CharMod("You are implicated in a news-making scandal", RepNetworks.cRep - 10),
     (75 to 76) -> RandCharMod("You pick up a new hobby", rand => (Skills.oneOf(art, interest) + 10).copy(field = Right(CharacterMod.SkillChoice.PickAny(rand)))),
     (77 to 78) -> CharMod("You are an early adopter of psychosurgery, finding that your mind adapts well to changes.", TraitsPositiveTranshuman.malleableMindLevel1),
     (79 to 80) -> CharMod("The stress of rapid technological change overwhelms you.", TraitsNegativeEP.mentalDisorder.copy(name = "Mental Disorder (ADHD)")),
@@ -126,7 +126,7 @@ object PreFallLifeEvent extends Table {
     (85 to 86) -> RandCharMod("You choose your own path over what others tell you to do.", rand => Skills.modAny(rand, 10)), // TODO replace skill instead
     (87 to 88) -> CharMod("You take care of someone in a way that makes them obligated to help you out for a long time to come.", TraitsPositiveTranshuman.personalConnection),
     (89 to 90) -> CharMod("You learn the hard way that ignoring money management lessons was a bad idea.", StartingCredit - 10000),
-    (91 to 92) -> CharMods("You take the fall for a crime you may or may not have been complicit in.", List(RepNetwork.cRep - 10, Moxie + 1)),
+    (91 to 92) -> CharMods("You take the fall for a crime you may or may not have been complicit in.", List(RepNetworks.cRep - 10, Moxie + 1)),
     (93 to 94) -> CharMod("An accident on a space elevator leaves your fearful of space.", TraitsNegativeTranshuman.phobiaDisorder.copy(name = "Phobia Disorder (Microgravity)")),
     (95 to 96) -> RandCharMod("You start up an unusual hobby.", rand => (Skills.oneOf(exoticMeleeWeapon, exoticRangedWeapon) + 20).copy(field = Right(CharacterMod.SkillChoice.PickAny(rand)))),
     (97 to 98) -> RandMorph("You lose a bet and spend a month sleeved in a pod or uplift morph before it was cool.", rand => ChoosingAMorph.randOnly(rand, MorphType.Pod, MorphFilter.Uplift)),

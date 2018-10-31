@@ -27,7 +27,7 @@ object BackgroundEventEffect {
 
 object BackgroundEvent extends Table {
   import CharImplicits._;
-  import Skills.Defaults._
+  import DefaultSkills._;
 
   override type Result = BackgroundEventResult;
 
@@ -87,7 +87,7 @@ object BackgroundEvent extends Table {
     (63 to 64) -> CharMod("Being a bully has its advantages.", intimidation + 10),
     (65 to 66) -> CharMod("Your first experiments with forking prove to you that merging will not be easy.", TraitsNegativeTranshuman.divergentPersonality),
     (67 to 68) -> RandMorph("You receive your first cortical stack at an early age -- and luckily just in time.", ChoosingAMorph.randMorph),
-    (69 to 70) -> CharMod("You are raised around animals.", Skills.Defaults.animalHandling + 10),
+    (69 to 70) -> CharMod("You are raised around animals.", animalHandling + 10),
     (71 to 72) -> CharMod("Your parents raise you with some unusual ideas.", TraitsNegativeTranshuman.faultyEducation),
     (73 to 74) -> RandCharMod("You cheat your way through school.", Skills.modAny(_, -10)),
     (75 to 76) -> CharMod("You enjoy urban exploration and getting into off-limits areas", Skills.oneOf(climbing, infiltration) + 10),

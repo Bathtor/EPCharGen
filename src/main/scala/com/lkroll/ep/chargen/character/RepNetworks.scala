@@ -2,12 +2,9 @@ package com.lkroll.ep.chargen.character
 
 import com.lkroll.common.macros.Macros
 import com.lkroll.ep.chargen._
+import com.lkroll.ep.compendium.RepNetwork
 
-case class RepNetwork(name: String, networkingField: String) {
-  def +(i: Int): CharacterMod.RepMod = CharacterMod.RepMod(Left(this), i);
-  def -(i: Int): CharacterMod.RepMod = CharacterMod.RepMod(Left(this), -i);
-}
-object RepNetwork {
+object RepNetworks {
   val circleARep = RepNetwork("@-Rep", "Autonomists");
   val cRep = RepNetwork("c-Rep", "Hypercorps");
   val eRep = RepNetwork("e-Rep", "Ecologists");

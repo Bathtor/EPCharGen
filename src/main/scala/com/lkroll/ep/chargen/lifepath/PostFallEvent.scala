@@ -4,7 +4,7 @@ import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.character._
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ Aptitude, Cost, Effect, EPTrait, MorphModel, MorphType, Gear => DataGear }
+import com.lkroll.ep.compendium.{ Aptitude, Cost, Effect, EPTrait, MorphModel, MorphType, Gear => DataGear, SkillCategory }
 import com.lkroll.ep.compendium.data._
 
 case class PostFallEventResult(descr: String, effects: List[PostFallEventEffect]) {
@@ -20,7 +20,7 @@ object PostFallEventEffect {
   case class NewMorph(morph: MorphModel) extends PostFallEventEffect {
     override def render: String = s"Changed Morph to ${morph.name}";
   }
-  case class ExtraPackage(pkg: Package) extends PostFallEventEffect {
+  case class ExtraPackage(pkg: PPPackage) extends PostFallEventEffect {
     override def render: String = s"Acquired package ${pkg.label}";
   }
 }
@@ -28,7 +28,7 @@ object PostFallEventEffect {
 object PostFallEvent extends Table {
   import Implicits.RandomArray
   import CharImplicits._;
-  import Skills.Defaults._;
+  import DefaultSkills._;
   import PackageImplicits.{ Moxie, StartingCredit, morphT2filter };
 
   override type Result = PostFallEventResult;
@@ -100,7 +100,7 @@ object PostFallEvent extends Table {
       PostFallEventResult(descr, List(PostFallEventEffect.CharMod(CharacterMod.GainGear(item(rand)))))
     }
   }
-  case class ExtraPackage(descr: String, pkg: Package) extends PostFallEventEntry {
+  case class ExtraPackage(descr: String, pkg: PPPackage) extends PostFallEventEntry {
     override def resolve(rand: Random): PostFallEventResult = {
       PostFallEventResult(descr, List(PostFallEventEffect.ExtraPackage(pkg)))
     }
@@ -116,10 +116,10 @@ object PostFallEvent extends Table {
     (10 to 10) -> CharMod("The merging of an overdue fork goes poorly, and coincidental inaccessible backups leave you permanently changed.", TraitsNegativeTranshuman.botchedMerge),
     (11 to 13) -> GatecrashingEvent("You are recruited to aid on a scientific mission."),
     (14 to 14) -> CharMod("In order to keep up with the stress of your responsibilities, you fall into bad habits.", TraitsNegativeEP.addictionModerate),
-    (15 to 15) -> RandCharMods("You do the right thing but piss off someone with power in the process.", rand => List(RepNetwork.chooseAny(rand, 10), TraitsNegativeEP.enemy)),
+    (15 to 15) -> RandCharMods("You do the right thing but piss off someone with power in the process.", rand => List(RepNetworks.chooseAny(rand, 10), TraitsNegativeEP.enemy)),
     (16 to 16) -> Gear("You use the post-Fall chaos to establish a new identity.", UniqueGear("Fake Identity")),
     (17 to 17) -> MultipleEntries("After an unfortunate incident leads to lack (lost memories due to resleeving from an old backup), you decide security of mind is a worthy investment.", CharMod("", TraitsNegativeEP.editedMemories), Gear("", UniqueGear("Backup Insurance 1 year"))),
-    (18 to 18) -> RandCharMod("After surviving the Fall and then only barely surviving a post-Fall clash, you decide that some self-defense training may be in order", Skills.modOnly(_, 20, Skills.SkillCategory.Combat)),
+    (18 to 18) -> RandCharMod("After surviving the Fall and then only barely surviving a post-Fall clash, you decide that some self-defense training may be in order", Skills.modOnly(_, 20, SkillCategory.Combat)),
     (19 to 19) -> Gear("Through a strange set of circumstances, you end up with a rare Delphinium Six petal flower", UniqueGear("Delphinium Six petal flower")),
     (20 to 20) -> CharMod("You commit a crime, get caught, and suffer the punishment.", TraitsNegativeEP.modifiedBehaviourLevel3),
     (21 to 21) -> CharMod("You have died enough times that your mind really can’t take it any more.", TraitsNegativeTranshuman.phobiaDisorder.copy(name = "Phobia Disorder (Thanatophobia)")),
@@ -138,9 +138,9 @@ object PostFallEvent extends Table {
     (36 to 36) -> CharMod("A long string of personal failures has you questioning your own resolve.", Aptitude.WIL - 5),
     (37 to 37) -> CharMod("No matter how often your friends warn you, you are promiscuous about your online data.", TraitsPanopticon.dataFootprint),
     (38 to 38) -> CharMod("Nothing ever seems to go your way—your cursed luck is legendary.", TraitsNegativeEP.badLuck),
-    (39 to 39) -> RandCharMod("You complete a major project of importance to your work/faction.", RepNetwork.chooseAny(_, 10)),
-    (40 to 40) -> RandCharMod("A project of importance to your work/faction fails under your direction.", RepNetwork.chooseAny(_, -10)),
-    (41 to 41) -> RandCharMod("You take up arms in a regional conflict.", Skills.modOnly(_, 10, Skills.SkillCategory.Combat)),
+    (39 to 39) -> RandCharMod("You complete a major project of importance to your work/faction.", RepNetworks.chooseAny(_, 10)),
+    (40 to 40) -> RandCharMod("A project of importance to your work/faction fails under your direction.", RepNetworks.chooseAny(_, -10)),
+    (41 to 41) -> RandCharMod("You take up arms in a regional conflict.", Skills.modOnly(_, 10, SkillCategory.Combat)),
     (42 to 42) -> RandMorph("Your work requires you to change your morph.", ChoosingAMorph.randMorph),
     (43 to 43) -> CharMod("You make an unpopular choice that burns many bridges.", TraitsNegativeEP.blacklistedOwn),
     (44 to 44) -> CharMod("A friend or relative opts for true death, but bequeaths you their estate.", StartingCredit + 25000),
@@ -164,7 +164,7 @@ object PostFallEvent extends Table {
     (62 to 62) -> CharMod("You commit a serious crime, but get away—for now.", TraitsNegativeEP.onTheRun),
     (63 to 65) -> GatecrashingEvent("You win the gatecrashing lottery and a free ticket to Pandora."),
     (66 to 66) -> CharMod("You go into business.", TraitsPositiveTranshuman.entrepreneurLevel1),
-    (67 to 67) -> RandCharMod("You become embroiled in a messy professional dispute.", RepNetwork.chooseAny(_, -5)),
+    (67 to 67) -> RandCharMod("You become embroiled in a messy professional dispute.", RepNetworks.chooseAny(_, -5)),
     (68 to 68) -> CharMod("You lose a contractual dispute in Extropian space.", TraitsNegativeTranshuman.defferedIndentureLevel1),
     (69 to 69) -> RandMorph("You rack up some debts and are forced to downgrade your lifestyle.", ChoosingAMorph.randMorph), // TODO cheap?!?
     (70 to 70) -> CharMod("You decide you need some help.", TraitsPositiveTranshuman.establishedFork),
@@ -173,7 +173,7 @@ object PostFallEvent extends Table {
     (73 to 73) -> CharMod("Doing your part to aid transhumanity’s regrowth, you have a kid.", TraitsNegativeTranshuman.dependent),
     (74 to 74) -> RandMorph("You have an unfortunately catastrophic sleeving accident, but the insurance paid well. Start play with 10 points of stress and a random derangement.", ChoosingAMorph.randMorph), // TODO fancy?
     (75 to 75) -> CharMod("You achieve something that the members of your faction will never forget.", TraitsPositiveTranshuman.goldStar),
-    (76 to 76) -> RandCharMod("You score an impressive win in a public competition.", RepNetwork.chooseAny(_, +5)),
+    (76 to 76) -> RandCharMod("You score an impressive win in a public competition.", RepNetworks.chooseAny(_, +5)),
     (77 to 77) -> CharMod("You split off an alpha fork to handle an important situation, but it decides not to come back.", TraitsNegativeTranshuman.errantFork),
     (78 to 78) -> RandGear("You take in an abandoned animal.", Array(UniqueGear("Smart Dog"), UniqueGear("Smart Monkey"), UniqueGear("Smart Rat")).randomElement(_).get),
     (79 to 79) -> CharMod("You are the victim of a crime, but the perpetrator is caught. Now you hold their indenture contract.", TraitsPositiveTranshuman.indentureHolder),
@@ -183,11 +183,11 @@ object PostFallEvent extends Table {
     (83 to 83) -> CharMod("You team up with a partner to get the job done.", TraitsPositiveTranshuman.minionPartner),
     (84 to 84) -> CharMod("Someone you respect shows their true colors, and they aren’t pretty.", Moxie + 1),
     (85 to 85) -> CharMod("Your exceptional nature is noticed.", TraitsPositiveEP.patron),
-    (86 to 86) -> RandCharMod("You get fired/kicked out.", RepNetwork.chooseAny(_, -10)), // ignore OR
+    (86 to 86) -> RandCharMod("You get fired/kicked out.", RepNetworks.chooseAny(_, -10)), // ignore OR
     (87 to 87) -> CharMod("An established university offers you a steady position.", TraitsPositiveTranshuman.tenure),
     (88 to 88) -> CharMod("A fork goes missing. It could be nothing, but it was in possession of some compromising information about yourself.", TraitsNegativeTranshuman.lostFork),
-    (89 to 89) -> RandCharMod("You fall for the smooth lies of a convincing member of another faction. You realize your error only after the damage is done.", RepNetwork.chooseAny(_, -10)), // TODO faction filter?
-    (90 to 90) -> MultipleEntries("A trolling hacker ruins your life but leaves you with sporting goodbye offering.", Gear("", UniqueGear("Kaos AI")), RandCharMod("", RepNetwork.chooseAny(_, -10))),
+    (89 to 89) -> RandCharMod("You fall for the smooth lies of a convincing member of another faction. You realize your error only after the damage is done.", RepNetworks.chooseAny(_, -10)), // TODO faction filter?
+    (90 to 90) -> MultipleEntries("A trolling hacker ruins your life but leaves you with sporting goodbye offering.", Gear("", UniqueGear("Kaos AI")), RandCharMod("", RepNetworks.chooseAny(_, -10))),
     (91 to 91) -> MultipleEntries("You are forced to resleeve in less-than-favorable conditions and end up with a morph with issues.", RandMorph("", ChoosingAMorph.randMorph), CharMod("", TraitsNegativeTranshuman.aggresiveGrm)),
     (92 to 92) -> CharMod("You fall in with a new crowd—one that will have your back.", TraitsPositiveEP.allies),
     (93 to 93) -> CharMod("You are part of a group that discovers a derelict ship and makes a great salvaging score.", StartingCredit + 20000),
@@ -215,14 +215,14 @@ object PostFallEvent extends Table {
     (69 to 70) -> CharMod("Your mission scores a major resource find.", StartingCredit + 20000),
     (71 to 72) -> CharMod("You receive some focused training in gate operations.", interfacing.gainSpecialization("Gate Operations")),
     (73 to 74) -> RandCharMod("You join a semi-successful colonization effort for a year", profession.modAnyField(_, +20)),
-    (75 to 76) -> RandCharMod("You uncover evidence of a previously unknown but long-dead alien race.", RepNetwork.chooseAny(_, +10)),
-    (77 to 78) -> RandCharMod("You put in several months of grueling work on a terraforming project.", rand => Skills.modOnly(rand, +10, academics, profession, Skills.SkillCategory.Technical)),
-    (79 to 80) -> RandCharMod("You severely botch a rescue operation. Lives are lost and stacks are not recovered.", RepNetwork.chooseAny(_, -10)),
+    (75 to 76) -> RandCharMod("You uncover evidence of a previously unknown but long-dead alien race.", RepNetworks.chooseAny(_, +10)),
+    (77 to 78) -> RandCharMod("You put in several months of grueling work on a terraforming project.", rand => Skills.modOnly(rand, +10, academics, profession, SkillCategory.Technical)),
+    (79 to 80) -> RandCharMod("You severely botch a rescue operation. Lives are lost and stacks are not recovered.", RepNetworks.chooseAny(_, -10)),
     (81 to 82) -> CharMod("You experience something while going through a gate that makes you never want to go through again.", TraitsNegativeTranshuman.phobiaDisorder.copy(name = "Phobia Disorder (Pandora Gates)")),
-    (83 to 84) -> RandCharMod("You participate in a dangerous rescue operation.", RepNetwork.chooseAny(_, +10)),
+    (83 to 84) -> RandCharMod("You participate in a dangerous rescue operation.", RepNetworks.chooseAny(_, +10)),
     (85 to 86) -> CharMod("You receive some focused training in gate operations.", academics.withField("Gate Operations") + 20),
     (87 to 88) -> Gear("You come into possession of your very own blue box (p. 157, Gatecrashing).", UniqueGear("Blue Box")),
-    (89 to 90) -> CharMod("You survive a lengthy gatehopping adventure.", RepNetwork.xRep + 20),
+    (89 to 90) -> CharMod("You survive a lengthy gatehopping adventure.", RepNetworks.xRep + 20),
     (91 to 92) -> RandMorph("Your mission is sabotaged by an unknown party.", ChoosingAMorph.randMorph),
     (93 to 94) -> CharMod("You step through a gate and arrive somewhere other than you expected. Your jaunt is adventurous, but you make it back safe.", profession.withField("Gatecrashing") + 10),
     (95 to 96) -> CharMod("You receive some focused training in gate operations.", programming.gainSpecialization("Gate Interface")),

@@ -1,11 +1,13 @@
 package com.lkroll.ep.chargen.lifepath
 
 import com.lkroll.ep.chargen._
-import com.lkroll.ep.chargen.character.{ Skill, Skills, Language, Languages }
-import com.lkroll.ep.compendium.Aptitude
+import com.lkroll.ep.chargen.character.{ CharImplicits, Skill, Skills }
+import com.lkroll.ep.compendium.{ Aptitude, Language }
+import com.lkroll.ep.compendium.data.{ DefaultSkills, Languages }
 
 object LanguageTable extends Table with Pickable {
-  import Languages._
+  import Languages._;
+  import CharImplicits.skilldef2skill;
 
   override type Result = Skill;
 
@@ -36,7 +38,7 @@ object LanguageTable extends Table with Pickable {
     (90 to 92) -> Urdu,
     (93 to 94) -> Vietnamese,
     (95 to 98) -> Wu,
-    (99 to 100) -> Other);
+    (99 to 100) -> Language.Other);
 
   private val uncommonData = utils.RollTable(
     (1 to 5) -> Afrikaans,
@@ -75,9 +77,9 @@ object LanguageTable extends Table with Pickable {
 
   private def randomElement(rand: Random): Option[Language] = {
     data.randomElement(rand).flatMap {
-      case Other => uncommonData.randomElement(rand)
-      case l     => Some(l)
+      case Language.Other => uncommonData.randomElement(rand)
+      case l              => Some(l)
     }
   }
-  private def toSkill(lang: character.Language): Skill = Skills.Defaults.language.withField(lang.toString()).instance(0);
+  private def toSkill(lang: Language): Skill = DefaultSkills.language.withField(lang.toString()).instance(0);
 }

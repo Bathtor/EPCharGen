@@ -25,7 +25,7 @@ object FirewallEventEffect {
 object FirewallEvent extends Table {
   import Implicits.RandomArray
   import CharImplicits._;
-  import Skills.Defaults._;
+  import DefaultSkills._;
   import PackageImplicits.{ Moxie, StartingCredit, morphT2filter };
 
   override type Result = FirewallEventResult;
@@ -80,19 +80,19 @@ object FirewallEvent extends Table {
     (59 to 60) -> RandMorph("You have an unexpected close encounter with the TQZ on Mars, the New Mumbai Containment Zone of Luna, or Iapetus.", ChoosingAMorph.randMorph),
     (61 to 62) -> RandMorph("An exhuman raid leaves you and others dead; Firewall helps sort out the mess.", ChoosingAMorph.randMorph),
     (63 to 64) -> CharMod("You are one of the few survivors of an exsurgent outbreak on your habitat.", TraitsPositiveEP.psiDefense1),
-    (65 to 66) -> RandCharMod("You find a relic. Bad things happen. Firewall cleans up the mess.", RepNetwork.chooseAny(_, -10)),
-    (67 to 68) -> CharMod("You were a member/supporter of one of the groups that evolved into Firewall from before the Fall. You took some time off, but now you’re back.", RepNetwork.iRep + 10),
+    (65 to 66) -> RandCharMod("You find a relic. Bad things happen. Firewall cleans up the mess.", RepNetworks.chooseAny(_, -10)),
+    (67 to 68) -> CharMod("You were a member/supporter of one of the groups that evolved into Firewall from before the Fall. You took some time off, but now you’re back.", RepNetworks.iRep + 10),
     (69 to 70) -> CharMod("You single-handedly foil an impending outbreak, but the local authorities blame you for the carnage. Firewall helps you escape.", TraitsNegativeEP.onTheRun),
     (71 to 72) -> RandMorph("A previously dormant TITAN nanoplague rampages through your habitat. ", ChoosingAMorph.randMorph),
     (73 to 74) -> RandMorph("Your ship stops to investigate/help a derelict ship and is never heard from again.", ChoosingAMorph.randMorph),
     (75 to 76) -> RandCharMod("You discover a lost cache on an isolated asteroid. Firewall actually lets you keep some of the find.", StartingCredit + (Dice.`1d10` * 5000).randomElement(_).get),
-    (77 to 78) -> CharMod("You step into an unknown fray and are lucky enough to pick the right side.", RepNetwork.iRep + 10),
-    (79 to 80) -> RandCharMod("You uncover a conspiracy within your faction and Firewall steps in to help you deal with it.", RepNetwork.chooseAny(_, +10)),
-    (81 to 82) -> RandCharMods("You are recruited to help Firewall cover up a secret or outbreak.", rand => List(RepNetwork.chooseAny(rand, -10), RepNetwork.iRep + 10)),
+    (77 to 78) -> CharMod("You step into an unknown fray and are lucky enough to pick the right side.", RepNetworks.iRep + 10),
+    (79 to 80) -> RandCharMod("You uncover a conspiracy within your faction and Firewall steps in to help you deal with it.", RepNetworks.chooseAny(_, +10)),
+    (81 to 82) -> RandCharMods("You are recruited to help Firewall cover up a secret or outbreak.", rand => List(RepNetworks.chooseAny(rand, -10), RepNetworks.iRep + 10)),
     (83 to 84) -> CharMod("You uncover a sleeper exsurgent cell the hard way.", TraitsNegativeTranshuman.phobiaDisorder.copy(name = "Phobia Disorder (Exsurgents)")),
-    (85 to 86) -> CharMod("You become aware of someone smuggling or dealing TITAN technology. Firewall steps in and deals with it, then recruits you.", RepNetwork.gRep - 5),
-    (87 to 88) -> CharMod("You were a member/supporter of one of the groups that evolved into Firewall from before the Fall.", RepNetwork.iRep + 10),
-    (89 to 90) -> CharMod("You are involved in a cover-up of a TITAN- or exsurgent-related secret during the Fall. Firewall finds you and brings you in to get the story.", RepNetwork.iRep + 10),
+    (85 to 86) -> CharMod("You become aware of someone smuggling or dealing TITAN technology. Firewall steps in and deals with it, then recruits you.", RepNetworks.gRep - 5),
+    (87 to 88) -> CharMod("You were a member/supporter of one of the groups that evolved into Firewall from before the Fall.", RepNetworks.iRep + 10),
+    (89 to 90) -> CharMod("You are involved in a cover-up of a TITAN- or exsurgent-related secret during the Fall. Firewall finds you and brings you in to get the story.", RepNetworks.iRep + 10),
     (91 to 92) -> CharMod("Someone you loved becomes infected. You keep it secret and protect them for a time, until everything goes bad. Firewall rescues you, then recruits you.", interest.withField("Exsurgents") + 10),
     (93 to 94) -> CharMod("You are a bit too good at ferreting out certain secrets online. Firewall brings you in to the fold to keep your mouth shut.", infosec + 10),
     (95 to 96) -> CharMod("Someone you are close to is a Firewall proxy; they brought you in to help them out.", Moxie + 1),

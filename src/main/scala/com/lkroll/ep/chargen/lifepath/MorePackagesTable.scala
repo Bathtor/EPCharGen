@@ -4,7 +4,7 @@ import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
 
-case class ExtraPackage(prefix: String, pkg: Package)
+case class ExtraPackage(prefix: String, pkg: PPPackage)
 
 class MorePackagesTable(
   val previousPath: PostFallPathTable,
