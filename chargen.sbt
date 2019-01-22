@@ -4,12 +4,12 @@ name := "EP Character Generator"
 
 organization := "com.lkroll.ep"
 
-version := "1.1.0-SNAPSHOT"
+version := "1.2.0-SNAPSHOT"
 
 scalaVersion := "2.12.7"
 
 val akkaV = "2.5.17"
-val epcompendiumV = "3.2.0-SNAPSHOT"
+val epcompendiumV = "3.3.0-SNAPSHOT"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % akkaV
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % akkaV
@@ -18,8 +18,8 @@ libraryDependencies += "com.lkroll.ep" %% "epcompendium-core" % epcompendiumV
 libraryDependencies += "com.lkroll.ep" %% "epcompendium-data" % epcompendiumV
 libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.+"
 libraryDependencies += "org.rogach" %% "scallop" % "3.1.+"
-libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
-libraryDependencies += "com.typesafe" % "config" % "1.3.2"
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.+"
+libraryDependencies += "com.typesafe" % "config" % "1.3.+"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.+"
 libraryDependencies += "com.lihaoyi" %% "upickle" % "0.6.4"
 libraryDependencies += "org.jliszka" %% "probability-monad" % "1.0.1"

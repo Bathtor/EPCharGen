@@ -27,6 +27,9 @@ object Main extends StrictLogging {
       if (conf.filterFaction.isSupplied) {
         filters ::= conf.filterFaction();
       }
+      if (conf.filterBackground.isSupplied) {
+        filters ::= conf.filterBackground();
+      }
       if (conf.filterGender.isSupplied) {
         filters ::= conf.filterGender();
       }
@@ -164,15 +167,19 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val deterministic = opt[Boolean]("deterministic", descr = "Run character generation single-threaded, to be sure that multiple characters can be regenerated with the same seed.");
 
   val filterFaction = opt[String]("filter-faction", descr = "Only show results where faction contains <arg>").map(CharFilter.Faction(_));
+  val filterBackground = opt[String]("filter-background", descr = "Only show results where background contains <arg>").map(CharFilter.Background(_));
   val filterGender = opt[String]("filter-gender", descr = "Only show results where apparent gender is <arg>").map(CharFilter.ApparentGender(_));
   val filterMorph = opt[String]("filter-morph", descr = "Only show results wearing a <arg> model").map(CharFilter.ActiveMorph(_));
   val filterBirthMorph = opt[String]("filter-birth-morph", descr = "Only show results born in a <arg> model").map(CharFilter.BirthMorph(_));
   val filterSkillMin = opt[List[String]]("filter-skill-min", descr = "Only show results with a skill s at least at total n for <arg>=s>n. Can be specified multiple times.")(listArgConverter(identity)).map { s =>
     s.map{ str =>
+      //println(s"Got input $str");
       val underToSpace = str.replace("_", " ");
       val split = underToSpace.split(">");
+      //println(s"Got split: ${split.mkString("'", "','", "'")}");
       require(split.size == 2, "Format for skill filters is [skillName]>[skillTotalMinimum]");
       val fieldSplit = split(0).split(":");
+      //println(s"Got field split: ${fieldSplit.mkString("'", "','", "'")}");
       if (fieldSplit.size == 1) {
         CharFilter.SkillOver(skillName = split(0), minTotal = split(1).toInt)
       } else {

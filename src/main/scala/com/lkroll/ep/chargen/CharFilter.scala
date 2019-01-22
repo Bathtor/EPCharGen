@@ -28,8 +28,18 @@ object CharFilter {
     override def matches(char: CharGenCharacter): Boolean = char.faction.contains(s);
   }
 
+  case class Background(s: String) extends CharFilter {
+    override def matches(char: CharGenCharacter): Boolean = char.background.contains(s);
+  }
+
   case class ApparentGender(s: String) extends CharFilter {
     override def matches(char: CharGenCharacter): Boolean = char.activeMorph.visibleGender.exists(_.contains(s));
+    // .map(_.toLowerCase).exists(g => {
+    //   s.toLowerCase match {
+    //     case "male" => g.contains("male") && !g.contains("female")
+    //     case sl     => g.contains(sl)
+    //   }
+    // });
   }
 
   case class ActiveMorph(s: String) extends CharFilter {
