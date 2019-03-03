@@ -103,7 +103,7 @@ class ResleeveTable(
         (21 to 21) -> Uplift,
         (22 to 30) -> Bio,
         (31 to 35) -> Pod,
-        (35 to 80) -> Synth,
+        (36 to 80) -> Synth,
         (81 to 100) -> Info)
       case Archetype.Butterfly if isUplift => RollTable(
         (1 to 70) -> Original,

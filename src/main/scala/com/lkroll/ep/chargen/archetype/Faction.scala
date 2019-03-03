@@ -252,7 +252,7 @@ class FactionTable(
         (77 to 77) -> skimmer,
         (78 to 78) -> socialite,
         (79 to 79) -> solarian,
-        (80 to 93) -> titanian,
+        (80 to 92) -> titanian,
         (93 to 94) -> ultimate,
         (95 to 100) -> venusian)
       case Archetype.Scientist => RollTable(

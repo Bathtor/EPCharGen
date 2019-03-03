@@ -115,58 +115,69 @@ object Main extends StrictLogging {
     };
     val resultsWithNamesF = Future.sequence(resultsWithNamesFs);
     logger.info(s"Awaiting ${resultsWithNamesFs.size} names...");
-    val resultsWithNames = Await.result(resultsWithNamesF, BehindTheName.genTimeout());
-    logger.info("Rendering...");
-    val seedString = if (conf.deterministic() || conf.number() == 1 || conf.seed.isSupplied) {
-      s"""
+    try {
+      val resultsWithNames = Await.result(resultsWithNamesF, BehindTheName.genTimeout());
+      logger.info("Rendering...");
+      val seedString = if (conf.deterministic() || conf.number() == 1 || conf.seed.isSupplied) {
+        s"""
 
 --- 
 Random Seed: `${seed}`
 """
-    } else "";
-    val renderer = new rendering.MarkdownRenderer(ending = seedString);
-    resultsWithNames match {
-      case Nil => {
-        Console.err.println("No results were produced!");
-        System.exit(1);
-      }
-      case (_, res) :: Nil => {
-        renderer.beginResult();
-        res.render(renderer);
-        renderer.endResult();
-      }
-      case moreResults => {
-        moreResults.foreach {
-          case (index, res) => {
-            renderer.beginResult(Some(index));
-            res.render(renderer);
-            renderer.endResult();
+      } else "";
+      val renderer = new rendering.MarkdownRenderer(ending = seedString);
+      resultsWithNames match {
+        case Nil => {
+          Console.err.println("No results were produced!");
+          System.exit(1);
+        }
+        case (_, res) :: Nil => {
+          renderer.beginResult();
+          res.render(renderer);
+          renderer.endResult();
+        }
+        case moreResults => {
+          moreResults.foreach {
+            case (index, res) => {
+              renderer.beginResult(Some(index));
+              res.render(renderer);
+              renderer.endResult();
+            }
           }
         }
       }
-    }
 
-    val rendered = renderer.result;
-    println(rendered);
-    val f = File.createTempFile("ep-compendium-macros", ".md");
-    f.deleteOnExit();
-    val w = new PrintWriter(f);
-    w.append(rendered);
-    w.flush();
-    w.close();
-    logger.info("Done");
-    println(s"Output was generated in ${f.getAbsolutePath}");
-    var procs: List[Process] = Nil;
-    if (conf.sublime()) {
-      val p = Runtime.getRuntime.exec(Array(sublimePath, f.getAbsolutePath));
-      procs ::= p;
+      val rendered = renderer.result;
+      println(rendered);
+      val f = File.createTempFile("ep-compendium-macros", ".md");
+      f.deleteOnExit();
+      val w = new PrintWriter(f);
+      w.append(rendered);
+      w.flush();
+      w.close();
+      logger.info("Done");
+      println(s"Output was generated in ${f.getAbsolutePath}");
+      var procs: List[Process] = Nil;
+      if (conf.sublime()) {
+        val p = Runtime.getRuntime.exec(Array(sublimePath, f.getAbsolutePath));
+        procs ::= p;
+      }
+      if (conf.marked()) {
+        val p = Runtime.getRuntime.exec(Array(markedPath, f.getAbsolutePath));
+        procs ::= p;
+      }
+      procs.foreach(_.waitFor());
+      System.exit(0);
+    } catch {
+      case e: java.util.concurrent.TimeoutException => {
+        logger.error("The command could not complete in time. Shutting down...", e);
+        System.exit(1);
+      }
+      case e: Throwable => {
+        logger.error("The command encountered an unkown error!", e);
+        System.exit(1);
+      }
     }
-    if (conf.marked()) {
-      val p = Runtime.getRuntime.exec(Array(markedPath, f.getAbsolutePath));
-      procs ::= p;
-    }
-    procs.foreach(_.waitFor());
-    System.exit(0);
   }
 }
 

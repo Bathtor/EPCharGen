@@ -296,11 +296,11 @@ class BackgroundTable(
         (1 to 1) -> SubTableBackground("Almost human", almostHumanTable),
         (2 to 3) -> SubTableBackground("An experiment gone horribly wrong", lostTable),
         (4 to 7) -> UnresolvedBackground("Second-class citizenship was not for you", BackgroundPackages.upliftEscapee, MorphTables.uplifts),
-        (7 to 10) -> UnresolvedBackground("Living proof that uplift works", BackgroundPackages.upliftStandard, MorphTables.uplifts));
+        (8 to 10) -> UnresolvedBackground("Living proof that uplift works", BackgroundPackages.upliftStandard, MorphTables.uplifts));
       case Archetype.Fighter => RollTable(
         (1 to 2) -> SubTableBackground("Almost human", almostHumanTable),
         (3 to 4) -> SubTableBackground("More machine than man", machineTable),
-        (5 to 7) -> SubTableBackground("An experiment gone horribly wrong", lostTable),
+        (5 to 6) -> SubTableBackground("An experiment gone horribly wrong", lostTable),
         (7 to 8) -> UnresolvedBackground("Second-class citizenship was not for you", BackgroundPackages.upliftEscapee, MorphTables.uplifts),
         (9 to 10) -> UnresolvedBackground("Living proof that uplift works", BackgroundPackages.upliftStandard, MorphTables.uplifts));
       case Archetype.Hacker => RollTable(
