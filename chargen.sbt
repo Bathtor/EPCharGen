@@ -8,6 +8,9 @@ version := "1.3.0-SNAPSHOT"
 
 scalaVersion := "2.12.8"
 
+scalacOptions += "-Xfatal-warnings"
+scalacOptions += "-feature"
+
 resolvers += Resolver.bintrayRepo("lkrollcom", "maven")
 
 val akkaV = "2.5.17"

@@ -180,6 +180,6 @@ object ChoosingAMorph {
     (75 to 81) -> MorphsGL.hotShot,
     (82 to 85) -> MorphsGL.sage,
     (86 to 92) -> MorphsGL.scholar,
-    (93 to 93) -> MorphsGL.scholar,
+    (93 to 93) -> MorphsGL.slave,
     (94 to 100) -> MorphsGL.wirehead);
 }

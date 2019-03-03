@@ -7,6 +7,7 @@ import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 import com.lkroll.ep.chargen.names.BehindTheName
 import com.lkroll.ep.chargen.impression.PersonalityTable
+import com.lkroll.ep.chargen.archetype.Archetype
 
 object Main extends StrictLogging {
 
@@ -48,44 +49,54 @@ object Main extends StrictLogging {
       }
     };
 
-    val firewall = if (conf.firewallAlways()) {
-      lifepath.FirewallOption.Always
+    val firewall: FirewallOption = if (conf.firewallAlways()) {
+      FirewallOption.Always
     } else if (conf.firewallAllow()) {
-      lifepath.FirewallOption.Allow
+      FirewallOption.Allow
     } else {
-      lifepath.FirewallOption.Skip
+      FirewallOption.Skip
     };
 
     val results = (1 to number).map(i => {
-      val res = if (conf.lifepath()) {
+      val cs = if (conf.lifepath()) {
         val lpc = new lifepath.LifePathCreation(
           fair = conf.fair(),
           firewall = firewall,
           gear = conf.gear(),
           moxie = conf.moxie());
-        if (conf.seed.isSupplied || conf.deterministic()) {
-          Future.successful {
-            val cres = filter.untilMatch {
-              lpc.randomCharacter(rand)
-            };
-            val pTable = PersonalityTable.forChar(cres.character);
-            val p = pTable.roll(rand);
-            cres.copy(character = cres.character.copy(personality = Some(p)))
-          }
-        } else {
-          Future {
-            val localRand = new Random(System.nanoTime() + i);
-            val cres = filter.untilMatch {
-              lpc.randomCharacter(localRand)
-            };
-            val pTable = PersonalityTable.forChar(cres.character);
-            val p = pTable.roll(rand);
-            cres.copy(character = cres.character.copy(personality = Some(p)))
-          }
-        }
+        lpc
+      } else if (conf.archetype.isSupplied) {
+        val at = conf.archetype();
+        val ac = new archetype.ArchetypeCreation(
+          archetype = at,
+          fair = conf.fair(),
+          firewall = firewall,
+          gear = conf.gear(),
+          moxie = conf.moxie());
+        ac
       } else {
         ???
       };
+      val res = if (conf.seed.isSupplied || conf.deterministic()) {
+        Future.successful {
+          val cres = filter.untilMatch {
+            cs.randomCharacter(rand)
+          };
+          val pTable = PersonalityTable.forChar(cres.character);
+          val p = pTable.roll(rand);
+          cres.copy(character = cres.character.copy(personality = Some(p)))
+        }
+      } else {
+        Future {
+          val localRand = new Random(System.nanoTime() + i);
+          val cres = filter.untilMatch {
+            cs.randomCharacter(localRand)
+          };
+          val pTable = PersonalityTable.forChar(cres.character);
+          val p = pTable.roll(rand);
+          cres.copy(character = cres.character.copy(personality = Some(p)))
+        }
+      }
       (i -> res)
     }).toList;
 
@@ -195,10 +206,12 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val moxie = toggle("moxie", default = Some(true), descrYes = "Allow generated character to have moxie.", descrNo = "Prevent generated characters from having moxie (for example, for NPCs)");
   val gear = toggle("gear", default = Some(false), descrYes = "Generate gear from starting credit.", descrNo = "List starting credit without generating gear.");
 
-  requireOne(lifepath);
-  dependsOnAny(fair, List(lifepath));
-  dependsOnAny(firewallAlways, List(lifepath));
-  dependsOnAny(firewallAllow, List(lifepath));
+  val archetype = opt[String]("archetype", descr = s"Use Archetype system. Possible options are ${Archetype.list.mkString(",")}.").map(Archetype.fromString);
+
+  requireOne(lifepath, archetype);
+  dependsOnAny(fair, List(lifepath, archetype));
+  dependsOnAny(firewallAlways, List(lifepath, archetype));
+  dependsOnAny(firewallAllow, List(lifepath, archetype));
   mutuallyExclusive(firewallAlways, firewallAllow);
 
   verify()

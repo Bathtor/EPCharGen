@@ -8,6 +8,7 @@ import akka.util._
 
 import upickle.default.{ ReadWriter => RW, _ }
 
+import scala.language.postfixOps
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success, Try }

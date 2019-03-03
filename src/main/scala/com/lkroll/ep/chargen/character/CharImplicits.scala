@@ -1,6 +1,7 @@
 package com.lkroll.ep.chargen.character
 
 import com.lkroll.ep.compendium._
+import scala.language.implicitConversions
 
 object CharImplicits {
 

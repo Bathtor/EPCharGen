@@ -4,6 +4,7 @@ import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.character._
 import com.lkroll.ep.compendium._
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 object PackageImplicits {

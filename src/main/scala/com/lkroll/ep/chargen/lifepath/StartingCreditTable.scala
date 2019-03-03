@@ -3,6 +3,8 @@ package com.lkroll.ep.chargen.lifepath
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.utils._
 
+import scala.language.implicitConversions
+
 object StartingCreditTable extends Table {
 
   override type Result = Int;

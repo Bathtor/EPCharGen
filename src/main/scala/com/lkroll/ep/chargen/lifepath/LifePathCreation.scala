@@ -1,21 +1,16 @@
 package com.lkroll.ep.chargen.lifepath
 
 import com.lkroll.ep.chargen._
-import com.lkroll.ep.chargen.character.{ CharImplicits, Skills, MorphInstantiation, RepNetworks }
+import com.lkroll.ep.chargen.character.{ CharImplicits, Skills, MorphInstantiation, RepNetworks, GenderTables }
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
 import com.lkroll.ep.compendium.{ Aptitudes, GenderIdentity, MorphModel, MorphInstance, RepNetwork }
 import com.lkroll.ep.compendium.data.DefaultSkills
 
+import scala.language.postfixOps
+
 trait PathIndex {
   def tableIndex: Int;
-}
-
-sealed trait FirewallOption;
-object FirewallOption {
-  case object Skip extends FirewallOption;
-  case object Allow extends FirewallOption;
-  case object Always extends FirewallOption;
 }
 
 class LifePathCreation(
@@ -30,6 +25,7 @@ class LifePathCreation(
   override def label: String = "Life Path"
   override def randomCharacter(rand: Random): CreationResult = {
     var stages: List[StageResult] = List(SystemResult(this));
+    var history: List[String] = Nil;
 
     val apts = AptitudeTemplateTable.roll(rand);
     stages ::= Stages.AptitudeTable(apts);
@@ -43,8 +39,6 @@ class LifePathCreation(
 
     val childhood = YouthPathTable.roll(rand);
     stages ::= Stages.YouthPathTable(childhood);
-
-    var history: List[String] = Nil;
     val skipFall = childhood.childhoods.head.skipPreFallReason match {
       case Some(r) => {
         history ::= s"Born after the Fall: $r";
@@ -57,10 +51,12 @@ class LifePathCreation(
     val background = childhood.childhoods.map(_.pkg.label).mkString(" & ");
 
     val genderId = if (background.contains("Infolife")) {
-      agiGenderTable.randomElement(rand).get
+      GenderTables.agiGenderTable.randomElement(rand).get
     } else {
-      normalGenderTable.randomElement(rand).get
+      GenderTables.normalGenderTable.randomElement(rand).get
     };
+
+    history ::= s"Brought up ${nativeLang.name} speaking.";
 
     var backgroundPackages: List[BackgroundPackage] = childhood.childhoods.map(_.pkg);
     assert(!backgroundPackages.isEmpty, "Can not have no background package!");
@@ -235,7 +231,6 @@ class LifePathCreation(
         };
       }
       case FirewallOption.Skip => {
-        import Implicits.RandomArray;
         if (hasIRep) {
           val points = char.rep(RepNetworks.iRep);
           val picked = RepNetworks.list.filter(n => n != RepNetworks.iRep).toArray.randomElement(rand).get;
@@ -258,6 +253,7 @@ class LifePathCreation(
     // Needs to happen before gear selection to make requirements work properly
     val combinationResult = character.CombineEverything(rand, char, moxie);
     char = combinationResult.char;
+    stages ::= Stages.CombineEverything(combinationResult);
 
     val startingCredit = StartingCreditTable.roll(rand);
     if (gear) {
@@ -282,27 +278,12 @@ class LifePathCreation(
       char = char.copy(startingCredit = Math.max(0, char.startingCredit + startingCredit));
     }
 
-    stages ::= Stages.CombineEverything(combinationResult);
-
     val storyEvent = StoryEvent.roll(rand);
     stages ::= Stages.StoryEvent(storyEvent);
     history ::= storyEvent;
 
     CreationResult(char.copy(history = history.reverse), stages.reverse)
   }
-
-  private val normalGenderTable: RollTable[GenderIdentity] = RollTable(
-    (1 to 45) -> GenderIdentity.Male,
-    (46 to 90) -> GenderIdentity.Female,
-    (91 to 93) -> GenderIdentity.Genderless,
-    (94 to 100) -> GenderIdentity.Other);
-
-  private val agiGenderTable: RollTable[GenderIdentity] = RollTable(
-    (1 to 10) -> GenderIdentity.Male,
-    (11 to 20) -> GenderIdentity.Female,
-    (21 to 80) -> GenderIdentity.Genderless,
-    (81 to 99) -> GenderIdentity.Plurality,
-    (100 to 100) -> GenderIdentity.Other);
 }
 
 object Stages {

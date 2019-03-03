@@ -5,6 +5,8 @@ import com.lkroll.ep.chargen.utils._
 import com.lkroll.ep.compendium._
 import com.lkroll.ep.compendium.data._
 
+import scala.language.implicitConversions
+
 case class TraitGroup(label: String, levels: Map[Int, EPTrait]) extends Iterable[EPTrait] {
   override def iterator: Iterator[EPTrait] = levels.valuesIterator;
 }

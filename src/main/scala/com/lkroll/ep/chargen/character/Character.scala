@@ -5,6 +5,8 @@ import com.lkroll.ep.chargen.creationpackages.ChoosingAMorph
 import com.lkroll.ep.chargen.rendering.Renderer
 import com.lkroll.ep.chargen.impression.Personality
 
+import scala.language.postfixOps
+
 case class CharGenCharacter(
   name:             String,
   personality:      Option[Personality]                  = None,

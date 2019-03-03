@@ -5,6 +5,8 @@ import com.lkroll.ep.chargen.utils._
 import com.lkroll.ep.compendium.{ Aptitude, AptitudeValues, EPTrait, Motivation, TraitType, RepNetwork, SkillCategory }
 import scala.collection.mutable
 
+import scala.language.postfixOps
+
 case class CombinationResult(char: CharGenCharacter, log: List[String])
 
 object CombineEverything {

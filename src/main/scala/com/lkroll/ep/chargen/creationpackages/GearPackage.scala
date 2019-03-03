@@ -6,6 +6,8 @@ import com.lkroll.ep.compendium._
 import com.lkroll.ep.compendium.data._
 import com.lkroll.common.macros.Macros
 
+import scala.language.implicitConversions
+
 case class GearPackage(
   label:         String,
   cpCost:        Int,

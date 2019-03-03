@@ -1,6 +1,7 @@
 package com.lkroll.ep.chargen
 
 import com.lkroll.ep.compendium.{ AptitudeValues, Aptitude }
+import scala.language.implicitConversions
 
 object Implicits {
   implicit def int2opt(i: Int): Option[Int] = Some(i);
