@@ -4,6 +4,7 @@ import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.rendering.Renderer
 import com.lkroll.ep.chargen.utils._
+import com.lkroll.common.macros.Macros
 
 case class Faction(label: String, pkg: FactionPackage)
 
@@ -30,6 +31,32 @@ object Allegiance {
   case object Titanian extends Allegiance;
   case object Ultimate extends Allegiance;
   case object Venusian extends Allegiance;
+
+  val list: List[Allegiance] = Macros.memberList[Allegiance];
+
+  def fromString(s: String): Allegiance = s.toLowerCase() match {
+    case "anarchist"      => Anarchist
+    case "argonaut"       => Argonaut
+    case "martian"        => Martian
+    case "belter"         => Belter
+    case "brinker"        => Brinker
+    case "criminal"       => Criminal
+    case "europan"        => Europan
+    case "beyondhumanity" => BeyondHumanity
+    case "extropian"      => Extropian
+    case "hypercorp"      => Hypercorp
+    case "jovian"         => Jovian
+    case "mercurial"      => Mercurial
+    case "orbital"        => Orbital
+    case "ringer"         => Ringer
+    case "scum"           => Scum
+    case "mercurian"      => Mercurian
+    case "socialite"      => Socialite
+    case "solarian"       => Solarian
+    case "titanian"       => Titanian
+    case "ultimate"       => Ultimate
+    case "venusian"       => Venusian
+  };
 }
 
 class FactionTable(

@@ -23,15 +23,15 @@ object PPDistributionTable extends Table {
   override type Result = PPDistribution;
 
   val data = utils.RollTable(
-    (1 to 15) -> PPDistribution(Formative, Influential, Basic, 1),
-    (16 to 30) -> PPDistribution(Influential, Basic, Formative, 1),
-    (31 to 45) -> PPDistribution(Formative, Basic, Influential, 1),
+    (1 to 5) -> PPDistribution(Formative, Influential, Basic, 1),
+    (6 to 25) -> PPDistribution(Influential, Basic, Formative, 1),
+    (26 to 45) -> PPDistribution(Formative, Basic, Influential, 1),
     (46 to 60) -> PPDistribution(Basic, Influential, Formative, 1),
     //
     (61 to 90) -> PPDistribution(Influential, Influential, Influential, 1),
     //
-    (91 to 95) -> PPDistribution(Formative, Basic, Basic, 3),
-    (96 to 100) -> PPDistribution(Basic, Basic, Formative, 3));
+    (91 to 92) -> PPDistribution(Formative, Basic, Basic, 3),
+    (93 to 100) -> PPDistribution(Basic, Basic, Formative, 3));
 
   override def label: String = "PP Distribution";
   override def source: String = "Homebrew";

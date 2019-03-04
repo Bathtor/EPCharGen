@@ -7,7 +7,7 @@ import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 import com.lkroll.ep.chargen.names.BehindTheName
 import com.lkroll.ep.chargen.impression.PersonalityTable
-import com.lkroll.ep.chargen.archetype.Archetype
+import com.lkroll.ep.chargen.archetype.{ Archetype, Origin, Allegiance }
 
 object Main extends StrictLogging {
 
@@ -72,7 +72,9 @@ object Main extends StrictLogging {
           fair = conf.fair(),
           firewall = firewall,
           gear = conf.gear(),
-          moxie = conf.moxie());
+          moxie = conf.moxie(),
+          origin = conf.origin.toOption,
+          allegiance = conf.allegiance.toOption);
         ac
       } else {
         ???
@@ -148,7 +150,9 @@ Random Seed: `${seed}`
       }
 
       val rendered = renderer.result;
-      println(rendered);
+      if (conf.verbose()) {
+        println(rendered);
+      }
       val f = File.createTempFile("ep-compendium-macros", ".md");
       f.deleteOnExit();
       val w = new PrintWriter(f);
@@ -182,6 +186,8 @@ Random Seed: `${seed}`
 }
 
 class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
+  val verbose = opt[Boolean]("verbose", descr = "Print everything to command-line");
+
   val seed = opt[Long]("seed", descr = "Specify a specific random seed to use for generation");
   val marked = opt[Boolean]("marked", descr = "Open the generated file in Marked.");
   val sublime = opt[Boolean]("sublime", descr = "Open the generated file in Sublime Text.");
@@ -217,13 +223,17 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val moxie = toggle("moxie", default = Some(true), descrYes = "Allow generated character to have moxie.", descrNo = "Prevent generated characters from having moxie (for example, for NPCs)");
   val gear = toggle("gear", default = Some(false), descrYes = "Generate gear from starting credit.", descrNo = "List starting credit without generating gear.");
 
-  val archetype = opt[String]("archetype", descr = s"Use Archetype system. Possible options are ${Archetype.list.mkString(",")}.").map(Archetype.fromString);
+  val archetype = opt[String]("archetype", descr = s"Use Archetype system. Possible options are ${Archetype.list.map(_.toString).sorted.mkString("[", ", ", "]")}.").map(Archetype.fromString);
+  val origin = opt[String]("origin", descr = s"Fix Background to <arg>. Possible options are ${Origin.list.map(_.toString).sorted.mkString("[", ", ", "]")}.").map(Origin.fromString);
+  val allegiance = opt[String]("allegiance", descr = s"Fix Faction to <arg>. Possible options are ${Allegiance.list.map(_.toString).sorted.mkString("[", ", ", "]")}.").map(Allegiance.fromString);
 
   requireOne(lifepath, archetype);
   dependsOnAny(fair, List(lifepath, archetype));
   dependsOnAny(firewallAlways, List(lifepath, archetype));
   dependsOnAny(firewallAllow, List(lifepath, archetype));
   mutuallyExclusive(firewallAlways, firewallAllow);
+  dependsOnAny(origin, List(archetype));
+  dependsOnAny(allegiance, List(archetype));
 
   verify()
 }

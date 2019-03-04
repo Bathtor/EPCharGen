@@ -6,6 +6,7 @@ import com.lkroll.ep.chargen.rendering.Renderer
 import com.lkroll.ep.chargen.utils._
 import com.lkroll.ep.compendium.MorphModel
 import com.lkroll.ep.compendium.data._
+import com.lkroll.common.macros.Macros
 
 case class Background(
   label:         String,
@@ -23,6 +24,19 @@ object Origin {
   case object RimwardHab extends Origin;
   case object Migrant extends Origin;
   case object CreatedNotBorn extends Origin;
+
+  val list: List[Origin] = Macros.memberList[Origin];
+
+  def fromString(s: String): Origin = s.toLowerCase() match {
+    case "earthborn"      => EarthBorn
+    case "orbital"        => Orbital
+    case "lunar"          => Lunar
+    case "martian"        => Martian
+    case "sunwardhab"     => SunwardHab
+    case "rimwardhab"     => RimwardHab
+    case "migrant"        => Migrant
+    case "creatednotborn" => CreatedNotBorn
+  };
 }
 
 class BackgroundTable(

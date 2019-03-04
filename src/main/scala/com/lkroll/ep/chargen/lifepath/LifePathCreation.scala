@@ -62,7 +62,15 @@ class LifePathCreation(
     assert(!backgroundPackages.isEmpty, "Can not have no background package!");
     val startingMorph = childhood.childhoods.head.startingMorph; // just take the first
     val instantiateMorph = (m: MorphModel) => MorphInstantiation.forModel(m, genderId).roll(rand);
-    var currentMorph: MorphInstance = instantiateMorph(startingMorph);
+    val startingAge = if (!skipFall) {
+      val startingAge = StartingAge.roll(rand);
+      startingAge
+    } else {
+      val age = rand.nextInt(10);
+      StartingAgeResult(age, true)
+    };
+    stages ::= Stages.StartingAge(startingAge);
+    var currentMorph: MorphInstance = MorphInstantiation.birthMorph(startingMorph, genderId, startingAge.age).roll(rand);
     val backgroundEvent: Option[BackgroundEventResult] = if (skipFall) {
       None
     } else {
@@ -93,6 +101,9 @@ class LifePathCreation(
       activeMorph = currentMorph,
       history = history.reverse);
 
+    char = startingAge.mods.foldLeft(char.copy(age = startingAge.age)) { (acc, mod) =>
+      mod.applyTo(acc)
+    };
     char = backgroundPackages.foldLeft(char)((acc, bgp) => bgp.applyTo(acc, rand));
 
     backgroundEvent match {
@@ -103,19 +114,8 @@ class LifePathCreation(
       case None => () // ignore
     }
 
-    val skipPreFallAdult = if (!skipFall) {
-      val startingAge = StartingAge.roll(rand);
-      stages ::= Stages.StartingAge(startingAge);
-      char = startingAge.mods.foldLeft(char.copy(age = startingAge.age)) { (acc, mod) =>
-        mod.applyTo(acc)
-      };
-      startingAge.skipPreFall;
-    } else {
-      char = char.copy(age = rand.nextInt(10));
-      true
-    };
     val lastBGNextPath = childhood.childhoods.last.nextPath;
-    val preFallPath = if (!skipPreFallAdult) {
+    val preFallPath = if (!startingAge.skipPreFall) {
       var adultPath = AdultPathTable.preFall(lastBGNextPath).roll(rand);
       val lifeEvent = PreFallLifeEvent.roll(rand);
       lifeEvent.effects.foreach {

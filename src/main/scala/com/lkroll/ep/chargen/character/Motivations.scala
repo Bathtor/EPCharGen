@@ -6,18 +6,19 @@ import com.lkroll.ep.compendium.{ Motivation, MotivationKind }
 import com.typesafe.scalalogging.StrictLogging
 
 object MotivationParser extends StrictLogging {
-  import fastparse.all._;
+  import fastparse._;
+  import NoWhitespace._
 
-  lazy val motParser: P[Motivation] = P(kindParser ~/ ws.rep ~ nameParser).map{ case (kind, s) => Motivation(kind, s) };
-  lazy val kindParser: P[MotivationKind] = P(eitherParser | likeParser | dislikeParser);
-  lazy val eitherParser: P[MotivationKind] = P(("+" ~ "/" ~/ ("-" | "–")) | (("-" | "–") ~ "/" ~/ "+")).map(_ => MotivationKind.Either);
-  lazy val likeParser: P[MotivationKind] = P("+").map(_ => MotivationKind.Like);
-  lazy val dislikeParser: P[MotivationKind] = P("-" | "–").map(_ => MotivationKind.Dislike);
-  lazy val nameParser: P[String] = P(AnyChar.rep.!);
-  lazy val ws = P(CharIn(" \t"));
+  def motParser[_: P]: P[Motivation] = P(kindParser ~/ ws.rep ~ nameParser).map{ case (kind, s) => Motivation(kind, s) };
+  def kindParser[_: P]: P[MotivationKind] = P(eitherParser | likeParser | dislikeParser);
+  def eitherParser[_: P]: P[MotivationKind] = P(("+" ~ "/" ~/ ("-" | "–")) | (("-" | "–") ~ "/" ~/ "+")).map(_ => MotivationKind.Either);
+  def likeParser[_: P]: P[MotivationKind] = P("+").map(_ => MotivationKind.Like);
+  def dislikeParser[_: P]: P[MotivationKind] = P("-" | "–").map(_ => MotivationKind.Dislike);
+  def nameParser[_: P]: P[String] = P(AnyChar.rep.!);
+  def ws[_: P]: P[Unit] = P(CharIn(" \t"));
 
   def parse(s: String): Option[Motivation] = {
-    motParser.parse(s) match {
+    fastparse.parse(s, motParser(_)) match {
       case Parsed.Success(m, _) => Some(m)
       case f: Parsed.Failure => {
         logger.warn(f.msg);

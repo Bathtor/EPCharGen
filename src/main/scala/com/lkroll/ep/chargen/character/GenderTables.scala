@@ -6,10 +6,10 @@ import com.lkroll.ep.compendium._
 
 object GenderTables {
   val normalGenderTable: RollTable[GenderIdentity] = RollTable(
-    (1 to 45) -> GenderIdentity.Male,
-    (46 to 90) -> GenderIdentity.Female,
-    (91 to 93) -> GenderIdentity.Genderless,
-    (94 to 100) -> GenderIdentity.Other);
+    (1 to 48) -> GenderIdentity.Male,
+    (49 to 96) -> GenderIdentity.Female,
+    (97 to 98) -> GenderIdentity.Genderless,
+    (99 to 100) -> GenderIdentity.Other);
 
   val agiGenderTable: RollTable[GenderIdentity] = RollTable(
     (1 to 10) -> GenderIdentity.Male,

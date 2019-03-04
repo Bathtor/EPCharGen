@@ -6,6 +6,7 @@ import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
 import com.lkroll.ep.compendium.{ Aptitudes, GenderIdentity, MorphModel, MorphInstance, RepNetwork }
 import com.lkroll.ep.compendium.data.DefaultSkills
+import com.lkroll.common.macros.Macros
 
 import scala.language.postfixOps
 
@@ -16,7 +17,7 @@ object Archetype {
   case object Hacker extends Archetype;
   case object Butterfly extends Archetype;
 
-  val list: List[Archetype] = List(Fighter, Scientist, Hacker, Butterfly);
+  val list: List[Archetype] = Macros.memberList[Archetype];
 
   def fromString(s: String): Archetype = s.toLowerCase() match {
     case "fighter"   => Fighter
@@ -27,11 +28,13 @@ object Archetype {
 }
 
 class ArchetypeCreation(
-  val archetype: Archetype,
-  val fair:      Boolean        = true,
-  val firewall:  FirewallOption = FirewallOption.Skip,
-  val gear:      Boolean        = false,
-  val moxie:     Boolean        = true) extends CreationSystem {
+  val archetype:  Archetype,
+  val fair:       Boolean            = true,
+  val firewall:   FirewallOption     = FirewallOption.Skip,
+  val gear:       Boolean            = false,
+  val moxie:      Boolean            = true,
+  val origin:     Option[Origin]     = None,
+  val allegiance: Option[Allegiance] = None) extends CreationSystem {
 
   import Implicits.RandomArray;
   import CharImplicits.skilldef2skill;
@@ -53,7 +56,7 @@ class ArchetypeCreation(
     val ppDistribution = PPDistributionTable.roll(rand);
     stages ::= Stages.PPDistributionTable(ppDistribution);
 
-    val backgroundResult = new BackgroundTable(archetype, ppDistribution.background).roll(rand);
+    val backgroundResult = new BackgroundTable(archetype, ppDistribution.background, origin).roll(rand);
     val background = backgroundResult.pkg.label;
     val startingMorph = backgroundResult.startingMorph;
     stages ::= Stages.BackgroundTable(backgroundResult);
@@ -67,7 +70,6 @@ class ArchetypeCreation(
     };
 
     val instantiateMorph = (m: MorphModel) => MorphInstantiation.forModel(m, genderId).roll(rand);
-    var currentMorph: MorphInstance = instantiateMorph(startingMorph);
 
     val startingAge = lifepath.StartingAge.roll(rand);
     stages ::= Stages.StartingAge(startingAge);
@@ -79,6 +81,8 @@ class ArchetypeCreation(
         s"${ageAtFall}BF"
       }
     };
+
+    var currentMorph: MorphInstance = MorphInstantiation.birthMorph(startingMorph, genderId, startingAge.age).roll(rand);
 
     history ::= s"Born/Created ${yearOfBirth} in a ${currentMorph.visibleGender.getOrElse("")} ${currentMorph.model}.";
     history ::= s"Brought up ${nativeLang.field.getOrElse("not")} speaking.";
@@ -99,7 +103,7 @@ class ArchetypeCreation(
 
     char = backgroundResult.pkg.applyTo(char, rand);
 
-    val factionResult = new FactionTable(archetype, ppDistribution.faction).roll(rand);
+    val factionResult = new FactionTable(archetype, ppDistribution.faction, allegiance).roll(rand);
     stages ::= Stages.FactionTable(factionResult);
     history ::= s"Joined the ${factionResult.label} faction";
     char = factionResult.pkg.applyTo(char, rand);
