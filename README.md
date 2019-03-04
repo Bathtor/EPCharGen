@@ -24,4 +24,4 @@ Then simply call `./run.sh --help` from bash to see the available options.
 
 License
 -------
-The material is based on *Eclipse Phase* by (Posthuman Studios)[http://eclipsephase.com] and is published under Creative Commons (BY-NC-SA) 3.0 (license)[https://creativecommons.org/licenses/by-nc-sa/3.0/] as is the original material.
+The material is based on *Eclipse Phase* by [Posthuman Studios](http://eclipsephase.com) and is published under Creative Commons (BY-NC-SA) 3.0 [license](https://creativecommons.org/licenses/by-nc-sa/3.0/) as is the original material.
