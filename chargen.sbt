@@ -4,7 +4,7 @@ name := "EP Character Generator"
 
 organization := "com.lkroll.ep"
 
-version := "1.3.0-SNAPSHOT"
+version := "1.3.0"
 
 scalaVersion := "2.12.8"
 

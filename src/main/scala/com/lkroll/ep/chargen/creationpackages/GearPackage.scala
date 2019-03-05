@@ -6,6 +6,8 @@ import com.lkroll.ep.compendium._
 import com.lkroll.ep.compendium.data._
 import com.lkroll.common.macros.Macros
 
+import scala.collection.mutable
+
 import scala.language.implicitConversions
 
 case class GearPackage(
@@ -25,14 +27,43 @@ case class GearPackage(
   }
 
   override def applyTo(c: CharGenCharacter, rand: Random): CharGenCharacter = {
+    val newEnhancements = c.activeMorph.enhancements ++ augmentations.map(_.name).toSet.toList;
     val moddedMorph = c.activeMorph.copy(
-      enhancements = (c.activeMorph.enhancements ++ augmentations.map(_.name)));
+      enhancements = newEnhancements);
     c.copy(
       activeMorph = moddedMorph,
-      gear = c.gear ++ gear,
+      gear = mergeGear(c.gear, gear),
       armour = c.armour ++ armour,
       weapons = c.weapons ++ weapons,
       software = c.software ++ software)
+  }
+
+  private def mergeGear(left: List[GearEntry], right: List[GearEntry]): List[GearEntry] = {
+    val gMap = mutable.Map.empty[String, GearEntry];
+    left.foreach { g =>
+      gMap.get(g.item.name) match {
+        case Some(e) => {
+          val newG = e.copy(count = e.count + g.count);
+          gMap += (e.item.name -> newG)
+        }
+        case None => {
+          gMap += (g.item.name -> g)
+        }
+      }
+    }
+    right.foreach { g =>
+      gMap.get(g.item.name) match {
+        case Some(e) => {
+          val newG = e.copy(count = e.count + g.count);
+          gMap += (e.item.name -> newG)
+        }
+        case None => {
+          gMap += (g.item.name -> g)
+        }
+      }
+    }
+
+    gMap.map(_._2).toList
   }
 }
 

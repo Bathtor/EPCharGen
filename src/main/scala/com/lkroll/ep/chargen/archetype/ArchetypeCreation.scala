@@ -181,36 +181,29 @@ class ArchetypeCreation(
     char = combinationResult.char;
     stages ::= Stages.CombineEverything(combinationResult);
 
+    var custCP = 100;
     val resleeve = new ResleeveTable(archetype, startingMorph, background, startingAge.age, char.isAsync).roll(rand);
     resleeve match {
       case Resleeve.NewMorph(m) => {
         currentMorph = instantiateMorph(m);
         history ::= s"Char had to resleeve into a ${currentMorph.visibleGender.getOrElse("")} ${currentMorph.model}.";
         char = char.copy(activeMorph = currentMorph);
+        custCP -= m.cpCost;
       }
       case Resleeve.None => {
         history ::= "Char survived in eir original morph.";
       }
     }
 
-    val startingCredit = lifepath.StartingCreditTable.roll(rand);
+    val startingCredit = lifepath.StartingCreditTable.roll(rand)
+    val gearCredit = custCP * 1000; // remaining CP in credits
     if (gear) {
-      var remainingCredit = startingCredit + char.startingCredit;
-      var availablePacks = GearPackages.list.toArray.filter(p =>
-        p.usableBy(char) && (p.creditCost <= remainingCredit));
-      var gearPacks: List[GearPackage] = Nil;
-      while (!availablePacks.isEmpty) {
-        val pack = availablePacks.randomElement(rand).get;
-        remainingCredit -= pack.creditCost;
-        availablePacks = availablePacks.filter(p =>
-          (p.label != pack.label) && (p.creditCost <= remainingCredit));
-        gearPacks ::= pack;
-      }
-      remainingCredit = Math.max(0, remainingCredit);
-      stages ::= Stages.Gear(Left((remainingCredit, gearPacks)));
-      char = gearPacks.foldLeft(char.copy(startingCredit = remainingCredit)) { (acc, gp) =>
-        gp.applyTo(acc, rand)
-      };
+      val table = new EquipmentSelection(archetype, char, gearCredit);
+      val res = table.roll(rand);
+      val remainingCredit = (gearCredit - res.creditCost) + startingCredit;
+      stages ::= Stages.Gear(Left((remainingCredit, res)));
+      char = res.applyTo(char, rand);
+      char = char.copy(startingCredit = remainingCredit);
     } else {
       stages ::= Stages.Gear(Right(startingCredit));
       char = char.copy(startingCredit = Math.max(0, char.startingCredit + startingCredit));
@@ -303,13 +296,26 @@ object Stages {
     }
   }
 
-  case class Gear(result: Either[(Int, List[GearPackage]), Int]) extends StageResult {
+  case class Gear(result: Either[(Int, Equipment), Int]) extends StageResult {
+    import EquipmentSelection.{ ArmourExt, WeaponExt };
+
     def render(renderer: Renderer): Unit = {
       renderer.stage("Step 13: Gear");
       result match {
         case Left((startingCredit, gear)) => {
           renderer.labelled("Starting Credit", startingCredit.toString());
-          renderer.list(gear.map(gp => s"${gp.label} (${gp.creditCost} credits)"))
+          renderer.newline();
+          renderer.labelled("Total Cost", gear.creditCost.toString());
+          renderer.subsection("Weapons");
+          renderer.list(gear.weapons.map(w => s"${w.name} (${w.price} credits)"));
+          renderer.subsection("Armour");
+          renderer.list(gear.armour.map(a => s"${a.name} (${a.price} credits)"));
+          renderer.subsection("Augmentations");
+          renderer.list(gear.augmentations.map(a => s"${a.name} (${a.price.average} credits)"));
+          renderer.subsection("Software");
+          renderer.list(gear.software.map(s => s"${s.name} (${s.price.average} credits)"));
+          renderer.subsection("Gear");
+          renderer.list(gear.gear.map(g => s"${g.count}x${g.item.name} (${g.item.price.average * g.count} credits)"));
         }
         case Right(startingCredit) => renderer.labelled("Starting Credit", startingCredit.toString())
       }
