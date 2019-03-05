@@ -211,10 +211,10 @@ class EquipmentSelection(
           val w = clubsData.randomElement(rand).get;
           Left(w)
         }
-        case "Exotic Melee Weapons" => {
+        case "Exotic Melee Weapon" => {
           Left(ExoticWeapons.monowireGarrote)
         }
-        case "Exotic Ranged Weapons" => {
+        case "Exotic Ranged Weapon" => {
           Left(ExoticWeapons.vortex)
         }
         case "Kinetic Weapons" => {
