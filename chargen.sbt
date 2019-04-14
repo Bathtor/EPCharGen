@@ -4,7 +4,7 @@ name := "EP Character Generator"
 
 organization := "com.lkroll.ep"
 
-version := "1.3.1"
+version := "1.3.2"
 
 scalaVersion := "2.12.8"
 
@@ -14,7 +14,7 @@ scalacOptions += "-feature"
 resolvers += Resolver.bintrayRepo("lkrollcom", "maven")
 
 val akkaV = "2.5.17"
-val epcompendiumV = "4.0.0"
+val epcompendiumV = "5.0.0"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % akkaV
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % akkaV
@@ -22,14 +22,14 @@ libraryDependencies += "com.typesafe.akka" %% "akka-http"   % "10.1.5"
 libraryDependencies += "com.lkroll.ep" %% "epcompendium-core" % epcompendiumV
 libraryDependencies += "com.lkroll.ep" %% "epcompendium-data" % epcompendiumV
 libraryDependencies += "com.lihaoyi" %% "fastparse" % "2.1.+"
-libraryDependencies += "org.rogach" %% "scallop" % "3.1.+"
+libraryDependencies += "org.rogach" %% "scallop" % "3.2.+"
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.+"
 libraryDependencies += "com.typesafe" % "config" % "1.3.+"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.+"
-libraryDependencies += "com.lihaoyi" %% "upickle" % "0.6.4"
-libraryDependencies += "org.jliszka" %% "probability-monad" % "1.0.1"
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4" % "test"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
+libraryDependencies += "com.lihaoyi" %% "upickle" % "0.7.+"
+libraryDependencies += "org.jliszka" %% "probability-monad" % "1.0.+"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
 
 buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
