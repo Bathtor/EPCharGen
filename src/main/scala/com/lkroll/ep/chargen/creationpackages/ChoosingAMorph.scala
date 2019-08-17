@@ -88,7 +88,7 @@ object ChoosingAMorph {
     (81 to 81) -> MorphsS.selkie,
     (82 to 82) -> MorphsAC.aquanaut,
     (83 to 85) -> MorphsAC.crasher,
-    (86 to 86) -> MorphsDF.dverg,
+    (86 to 86) -> MorphsDF.dvergr,
     (87 to 87) -> MorphsAC.ariel,
     (88 to 89) -> MorphsAC.bruiser,
     (90 to 90) -> MorphsAC.cloudSkate,

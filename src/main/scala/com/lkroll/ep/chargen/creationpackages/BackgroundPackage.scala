@@ -2,7 +2,7 @@ package com.lkroll.ep.chargen.creationpackages
 
 import com.lkroll.ep.chargen.{ Implicits, Random }
 import com.lkroll.ep.chargen.character._
-import com.lkroll.ep.compendium.{Aptitude, Motivation, SkillCategory}
+import com.lkroll.ep.compendium.{ Aptitude, Motivation, SkillCategory }
 import com.lkroll.ep.compendium.data.{ DefaultSkills, Disorders => DisorderData, _ }
 
 case class BackgroundPackage(
@@ -18,10 +18,10 @@ case class BackgroundPackage(
     val motivatedChar = c.copy(motivations = c.motivations ++ motivations);
     val moddedChar = mods.foldLeft(motivatedChar) { (acc, mod) =>
       mod match {
-        case PackageContent.Mod(m)      => m.applyTo(acc)
-        case PackageContent.Mods(ms)    => ms.foldLeft(acc)((acc2, m) => m.applyTo(acc2))
-        case PackageContent.RandMod(mf) => mf(rand).applyTo(acc)
-        case PackageContent.RandMods(ms)=> ms(rand).foldLeft(acc)((acc2, m) => m.applyTo(acc2))
+        case PackageContent.Mod(m)       => m.applyTo(acc)
+        case PackageContent.Mods(ms)     => ms.foldLeft(acc)((acc2, m) => m.applyTo(acc2))
+        case PackageContent.RandMod(mf)  => mf(rand).applyTo(acc)
+        case PackageContent.RandMods(ms) => ms(rand).foldLeft(acc)((acc2, m) => m.applyTo(acc2))
       }
     };
     val concreteSkills = skills.map(_.toSkill(rand));
@@ -35,7 +35,7 @@ object BackgroundPackages {
   import Implicits.RandomArray;
   import PackageImplicits._;
   import DefaultSkills.{ list => skillList, _ };
-  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation, skilldef2skill  };
+  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation, skilldef2skill };
   import RepNetworks._;
 
   val colonistCommandStaff = PackageGroup(
@@ -946,9 +946,9 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         TraitsPositiveEP.psi2,
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
         TraitsNegativeEP.onTheRun,
         TraitsNegativeEP.realWorldNaivete,
         CharacterMod.BecomeAsync,
@@ -964,8 +964,8 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         TraitsPositiveEP.psi2,
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
         rpc(Disorders.roll(_)),
         TraitsNegativeEP.onTheRun,
         TraitsNegativeEP.realWorldNaivete,
@@ -989,9 +989,9 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         TraitsPositiveEP.psi2,
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
         TraitsNegativeEP.onTheRun,
         TraitsNegativeEP.realWorldNaivete,
         CharacterMod.BecomeAsync,
@@ -1022,10 +1022,10 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         TraitsPositiveEP.psi1,
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
         CharacterMod.BecomeAsync,
-        Sleights.PsiChi + 2), 
+        Sleights.PsiChi + 2),
       skills = List(
         academics.anyField(30),
         persuasion.at(35))),
@@ -1036,11 +1036,10 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         TraitsPositiveEP.psi1,
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
         CharacterMod.BecomeAsync,
-        Sleights.PsiChi + 4,
-      ), 
+        Sleights.PsiChi + 4),
       skills = List(
         academics.anyField(40),
         freeFall.at(30),
@@ -1056,9 +1055,9 @@ object BackgroundPackages {
       mods = List(
         Moxie + 1,
         TraitsPositiveEP.psi2,
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
-        rpc(Disorders.roll(_)), 
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
+        rpc(Disorders.roll(_)),
         CharacterMod.BecomeAsync,
         Sleights.PsiChi + 4,
         Sleights.PsiGamma + 2,
