@@ -1,7 +1,7 @@
 package com.lkroll.ep.chargen.character
 
 import com.lkroll.common.macros.Macros
-import com.lkroll.ep.compendium.{ Aptitude, AptitudeValues, CharacterSkill, SkillCategory, SkillClass, SkillDef }
+import com.lkroll.ep.compendium.{Aptitude, AptitudeValues, CharacterSkill, SkillCategory, SkillClass, SkillDef}
 import com.lkroll.ep.compendium.data.DefaultSkills
 import com.lkroll.ep.chargen.rendering.Renderer
 import com.lkroll.ep.chargen._
@@ -16,15 +16,15 @@ case class Skill(skillDef: Skills.Skill, ranks: Int, specs: List[String] = Nil) 
 
   def withField(s: String): Skill = this.copy(skillDef = skillDef.withField(s));
 
-  def toCompendium(): CharacterSkill = CharacterSkill(
-    name = name,
-    field = field,
-    cls = skillDef.cls,
-    category = skillDef.category,
-    apt = skillDef.apt,
-    noDefaulting = skillDef.skill.noDefaulting,
-    ranks = ranks,
-    specs = specs);
+  def toCompendium(): CharacterSkill =
+    CharacterSkill(name = name,
+                   field = field,
+                   cls = skillDef.cls,
+                   category = skillDef.category,
+                   apt = skillDef.apt,
+                   noDefaulting = skillDef.skill.noDefaulting,
+                   ranks = ranks,
+                   specs = specs);
 
   def render(renderer: Renderer, apts: AptitudeValues): Unit = {
     val total = apts.valueFor(apt) + ranks;
@@ -81,12 +81,27 @@ object SkillFilter {
 object Skills {
   import Implicits._;
 
-  def chooseAny(ranks: Int): PackageContent.Skill = PackageContent.Skill(Right(PackageContent.SkillChoice.PickAny), Right(PackageContent.SkillChoice.PickAny), ranks);
-  def chooseOnly(ranks: Int, filters: SkillFilter*): PackageContent.Skill = PackageContent.Skill(Right(PackageContent.SkillChoice.PickOnly(filters.toList)), Right(PackageContent.SkillChoice.PickAny), ranks);
-  def modAny(rand: Random, mod: Int): CharacterMod.SkillMod = CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.PickAny(rand)), Right(CharacterMod.SkillChoice.PickAny(rand)), mod);
-  def modOnly(rand: Random, mod: Int, filters: SkillFilter*): CharacterMod.SkillMod = CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.PickOnly(rand, filters.toList)), Right(CharacterMod.SkillChoice.PickAny(rand)), mod);
-  def oneOf(skills: Skill*): PackageContent.SkillChoice.OneOf = PackageContent.SkillChoice.OneOf(skills.map(_.name).toList);
-  def specializeAny(rand: Random): CharacterMod.SkillMod = CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.PickAny(rand)), Right(CharacterMod.SkillChoice.PickAny(rand)), 0, Some(Right(CharacterMod.SkillChoice.PickAny(rand))));
+  def chooseAny(ranks: Int): PackageContent.Skill =
+    PackageContent.Skill(Right(PackageContent.SkillChoice.PickAny), Right(PackageContent.SkillChoice.PickAny), ranks);
+  def chooseOnly(ranks: Int, filters: SkillFilter*): PackageContent.Skill =
+    PackageContent.Skill(Right(PackageContent.SkillChoice.PickOnly(filters.toList)),
+                         Right(PackageContent.SkillChoice.PickAny),
+                         ranks);
+  def modAny(rand: Random, mod: Int): CharacterMod.SkillMod =
+    CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.PickAny(rand)),
+                          Right(CharacterMod.SkillChoice.PickAny(rand)),
+                          mod);
+  def modOnly(rand: Random, mod: Int, filters: SkillFilter*): CharacterMod.SkillMod =
+    CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.PickOnly(rand, filters.toList)),
+                          Right(CharacterMod.SkillChoice.PickAny(rand)),
+                          mod);
+  def oneOf(skills: Skill*): PackageContent.SkillChoice.OneOf =
+    PackageContent.SkillChoice.OneOf(skills.map(_.name).toList);
+  def specializeAny(rand: Random): CharacterMod.SkillMod =
+    CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.PickAny(rand)),
+                          Right(CharacterMod.SkillChoice.PickAny(rand)),
+                          0,
+                          Some(Right(CharacterMod.SkillChoice.PickAny(rand))));
 
   case class Skill(skill: SkillDef) {
 
@@ -110,13 +125,18 @@ object Skills {
     }
     def +(mod: Int): CharacterMod.SkillMod = CharacterMod.SkillMod(Left(name), Left(field), mod);
     def -(mod: Int): CharacterMod.SkillMod = CharacterMod.SkillMod(Left(name), Left(field), -mod);
-    def modAnyField(rand: Random, mod: Int): CharacterMod.SkillMod = CharacterMod.SkillMod(Left(name), Right(CharacterMod.SkillChoice.PickAny(rand)), mod);
-    def gainSpecialization(spec: String): CharacterMod.SkillMod = CharacterMod.SkillMod(Left(name), Left(field), 0, Some(Left(spec)));
-    def anySpecialization(rand: Random): CharacterMod.SkillMod = CharacterMod.SkillMod(Left(name), Left(field), 0, Some(Right(CharacterMod.SkillChoice.PickAny(rand))));
+    def modAnyField(rand: Random, mod: Int): CharacterMod.SkillMod =
+      CharacterMod.SkillMod(Left(name), Right(CharacterMod.SkillChoice.PickAny(rand)), mod);
+    def gainSpecialization(spec: String): CharacterMod.SkillMod =
+      CharacterMod.SkillMod(Left(name), Left(field), 0, Some(Left(spec)));
+    def anySpecialization(rand: Random): CharacterMod.SkillMod =
+      CharacterMod.SkillMod(Left(name), Left(field), 0, Some(Right(CharacterMod.SkillChoice.PickAny(rand))));
 
     def at(ranks: Int): PackageContent.Skill = PackageContent.Skill(Left(name), Left(field), ranks);
-    def anyField(ranks: Int): PackageContent.Skill = PackageContent.Skill(Left(name), Right(PackageContent.SkillChoice.PickAny), ranks);
-    def oneOf(fields: String*): PackageContent.Skill = PackageContent.Skill(Left(name), Right(PackageContent.SkillChoice.OneOf(fields.toList)), 0);
+    def anyField(ranks: Int): PackageContent.Skill =
+      PackageContent.Skill(Left(name), Right(PackageContent.SkillChoice.PickAny), ranks);
+    def oneOf(fields: String*): PackageContent.Skill =
+      PackageContent.Skill(Left(name), Right(PackageContent.SkillChoice.OneOf(fields.toList)), 0);
 
     def matches(other: Skill): Boolean = this.skill.matches(other.skill);
   }

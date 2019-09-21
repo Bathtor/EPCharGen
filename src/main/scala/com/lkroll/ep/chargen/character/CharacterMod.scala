@@ -104,7 +104,11 @@ object CharacterMod extends LazyLogging {
     }
   }
 
-  case class SkillMod(skill: Either[String, SkillChoice], field: Either[Option[String], SkillChoice], mod: Int, specialization: Option[Either[String, SkillChoice]] = None) extends CharacterMod {
+  case class SkillMod(skill: Either[String, SkillChoice],
+                      field: Either[Option[String], SkillChoice],
+                      mod: Int,
+                      specialization: Option[Either[String, SkillChoice]] = None)
+      extends CharacterMod {
     override def applyTo(character: CharGenCharacter): CharGenCharacter = {
       require(!character.skills.isEmpty, "Cannot apply SkillMod to empty skill list!");
       val (targets, rest) = skill match {
@@ -148,28 +152,36 @@ object CharacterMod extends LazyLogging {
           if (targets.isEmpty) {
             (targets, Nil) // don't make up skills...drop the mod
           } else {
-            val fieldDefined = targets.map(s => if (s.field.isDefined && s.field.get == "???") {
-              s.skillDef.sampleFields match {
-                case Some(sampleFields) => {
-                  val field = sampleFields.randomElement(rand).get;
-                  s.withField(field)
+            val fieldDefined = targets.map(
+              s =>
+                if (s.field.isDefined && s.field.get == "???") {
+                  s.skillDef.sampleFields match {
+                    case Some(sampleFields) => {
+                      val field = sampleFields.randomElement(rand).get;
+                      s.withField(field)
+                    }
+                    case None => {
+                      s.withField("Pick-A-Field")
+                    }
+                  }
+                } else {
+                  s
                 }
-                case None => {
-                  s.withField("Pick-A-Field")
-                }
-              }
-            } else {
-              s
-            });
+            );
             choosePartition(rand, fieldDefined)
           }
         }
         case Right(SkillChoice.OneOf(l)) => {
-          val res = targets.map(s => if (s.field.isDefined && s.field.get == "???") {
-            s.withField(l.head)
-          } else {
-            s
-          }).partition(s => s.field.isDefined && l.contains(s.field.get));
+          val res = targets
+            .map(
+              s =>
+                if (s.field.isDefined && s.field.get == "???") {
+                  s.withField(l.head)
+                } else {
+                  s
+                }
+            )
+            .partition(s => s.field.isDefined && l.contains(s.field.get));
           res._1 match {
             case Nil          => (Nil, targets) // don't make up skills...drop the mod
             case head :: Nil  => res
@@ -183,7 +195,7 @@ object CharacterMod extends LazyLogging {
           subTargets.map(s => s.copy(ranks = s.ranks + mod, specs = spec :: s.specs))
         }
         case Some(Right(SkillChoice.PickAny(rand))) => {
-          subTargets.map{ s =>
+          subTargets.map { s =>
             val spec = Skills.Defaults.list.find(_.name.equalsIgnoreCase(s.name)) match {
               case Some(ds) => ds.sampleSpecs.randomElement(rand).get
               case None     => "Pick-A-Spec"

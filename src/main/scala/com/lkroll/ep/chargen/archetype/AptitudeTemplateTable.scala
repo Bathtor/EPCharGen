@@ -1,7 +1,7 @@
 package com.lkroll.ep.chargen.archetype
 
 import com.lkroll.ep.chargen._
-import com.lkroll.ep.chargen.character.{ AptitudeTemplate, AptitudeTemplates }
+import com.lkroll.ep.chargen.character.{AptitudeTemplate, AptitudeTemplates}
 
 class AptitudeTemplateTable(archetype: Archetype) extends Table with Pickable {
   import com.lkroll.ep.chargen.Implicits.RandomArray
@@ -22,25 +22,23 @@ class AptitudeTemplateTable(archetype: Archetype) extends Table with Pickable {
 
   private val data: Array[Result] = {
     archetype match {
-      case Archetype.Fighter => Array(
-        AptitudeTemplates.brawler,
-        AptitudeTemplates.dilettante,
-        AptitudeTemplates.survivor,
-        AptitudeTemplates.thrillSeeker)
-      case Archetype.Hacker => Array(
-        AptitudeTemplates.dilettante,
-        AptitudeTemplates.inquisitive,
-        AptitudeTemplates.researcher,
-        AptitudeTemplates.techie)
-      case Archetype.Scientist => Array(
-        AptitudeTemplates.dilettante,
-        AptitudeTemplates.inquisitive,
-        AptitudeTemplates.researcher,
-        AptitudeTemplates.techie)
-      case Archetype.Butterfly => Array(
-        AptitudeTemplates.dilettante,
-        AptitudeTemplates.extrovert,
-        AptitudeTemplates.inquisitive)
+      case Archetype.Fighter =>
+        Array(AptitudeTemplates.brawler,
+              AptitudeTemplates.dilettante,
+              AptitudeTemplates.survivor,
+              AptitudeTemplates.thrillSeeker)
+      case Archetype.Hacker =>
+        Array(AptitudeTemplates.dilettante,
+              AptitudeTemplates.inquisitive,
+              AptitudeTemplates.researcher,
+              AptitudeTemplates.techie)
+      case Archetype.Scientist =>
+        Array(AptitudeTemplates.dilettante,
+              AptitudeTemplates.inquisitive,
+              AptitudeTemplates.researcher,
+              AptitudeTemplates.techie)
+      case Archetype.Butterfly =>
+        Array(AptitudeTemplates.dilettante, AptitudeTemplates.extrovert, AptitudeTemplates.inquisitive)
     }
   }
 

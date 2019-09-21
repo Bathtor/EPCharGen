@@ -1,6 +1,6 @@
 package com.lkroll.ep.chargen
 
-import com.lkroll.ep.chargen.character.{ CharGenCharacter, Skill }
+import com.lkroll.ep.chargen.character.{CharGenCharacter, Skill}
 import com.lkroll.ep.chargen.rendering.Renderer
 
 trait StageResult {
@@ -26,7 +26,7 @@ case class CreationResult(character: CharGenCharacter, stages: List[StageResult]
   def findNativeLanguage(): Skill = {
     stages.foreach {
       case lifepath.Stages.NativeLangTable(nativeLang) => return nativeLang
-      case _ => // ignore
+      case _                                           => // ignore
     }
     return lifepath.LanguageTable.pick(99)
   }

@@ -1,6 +1,6 @@
 package com.lkroll.ep.chargen
 
-import com.lkroll.ep.compendium.{ AptitudeValues, Aptitude }
+import com.lkroll.ep.compendium.{Aptitude, AptitudeValues}
 import scala.language.implicitConversions
 
 object Implicits {

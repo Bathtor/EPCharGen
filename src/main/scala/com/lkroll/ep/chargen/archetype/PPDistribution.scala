@@ -4,7 +4,10 @@ import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.creationpackages.PackageLevel
 import com.lkroll.ep.chargen.rendering.Renderer
 
-case class PPDistribution(background: PackageLevel, faction: PackageLevel, focus: PackageLevel, customisation: Int = 0) {
+case class PPDistribution(background: PackageLevel,
+                          faction: PackageLevel,
+                          focus: PackageLevel,
+                          customisation: Int = 0) {
   def render(renderer: Renderer): Unit = {
     renderer.labelled("Background", s"${background.ppCost}PP");
     renderer.newline();
@@ -31,7 +34,8 @@ object PPDistributionTable extends Table {
     (61 to 90) -> PPDistribution(Influential, Influential, Influential, 1),
     //
     (91 to 92) -> PPDistribution(Formative, Basic, Basic, 3),
-    (93 to 100) -> PPDistribution(Basic, Basic, Formative, 3));
+    (93 to 100) -> PPDistribution(Basic, Basic, Formative, 3)
+  );
 
   override def label: String = "PP Distribution";
   override def source: String = "Homebrew";

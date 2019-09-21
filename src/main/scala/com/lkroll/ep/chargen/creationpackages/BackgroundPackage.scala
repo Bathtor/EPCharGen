@@ -1,16 +1,16 @@
 package com.lkroll.ep.chargen.creationpackages
 
-import com.lkroll.ep.chargen.{ Implicits, Random }
+import com.lkroll.ep.chargen.{Implicits, Random}
 import com.lkroll.ep.chargen.character._
-import com.lkroll.ep.compendium.{ Aptitude, Motivation, SkillCategory }
-import com.lkroll.ep.compendium.data.{ DefaultSkills, Disorders => DisorderData, _ }
+import com.lkroll.ep.compendium.{Aptitude, Motivation, SkillCategory}
+import com.lkroll.ep.compendium.data.{DefaultSkills, Disorders => DisorderData, _}
 
-case class BackgroundPackage(
-  label:       String,
-  level:       PackageLevel,
-  motivations: List[Motivation]           = Nil,
-  mods:        List[PackageContent]       = Nil,
-  skills:      List[PackageContent.Skill] = Nil) extends GroupedPackage {
+case class BackgroundPackage(label: String,
+                             level: PackageLevel,
+                             motivations: List[Motivation] = Nil,
+                             mods: List[PackageContent] = Nil,
+                             skills: List[PackageContent.Skill] = Nil)
+    extends GroupedPackage {
   override type Self = BackgroundPackage;
   override def withPrefix(prefix: String): Self = this.copy(label = s"$prefix $label");
   override def ppCost: Int = level.ppCost;
@@ -34,8 +34,15 @@ case class BackgroundPackage(
 object BackgroundPackages {
   import Implicits.RandomArray;
   import PackageImplicits._;
-  import DefaultSkills.{ list => skillList, _ };
-  import CharImplicits.{ skillcls2filter, skillcat2filter, string2filter, skill2filter, string2motivation, skilldef2skill };
+  import DefaultSkills.{list => skillList, _};
+  import CharImplicits.{
+    skill2filter,
+    skillcat2filter,
+    skillcls2filter,
+    skilldef2skill,
+    string2filter,
+    string2motivation
+  };
   import RepNetworks._;
 
   val colonistCommandStaff = PackageGroup(
@@ -45,10 +52,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Hard Work", "+Leadership", "+Survival"),
       mods = List(Moxie + 1),
-      skills = List(
-        persuasion.at(15),
-        profession.withField("Administration").at(30),
-        protocol.at(40))),
+      skills = List(persuasion.at(15), profession.withField("Administration").at(30), protocol.at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -62,15 +67,14 @@ object BackgroundPackages {
         persuasion.at(40),
         pilot.anyField(30),
         profession.withField("Administration").at(40),
-        protocol.at(50))),
+        protocol.at(50)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Hard Work", "+Leadership", "+Survival"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.SAV + 5,
-        r(rand => RepNetworks.chooseAny(rand, +50))),
+      mods = List(Moxie + 1, Aptitude.SAV + 5, r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(40),
         art.anyField(40),
@@ -83,7 +87,10 @@ object BackgroundPackages {
         persuasion.at(40),
         pilot.anyField(30),
         profession.withField("Administration").at(40),
-        protocol.at(50))));
+        protocol.at(50)
+      )
+    )
+  );
 
   val colonistFlightStaff = PackageGroup(
     label = "Colonist: Flight Staff",
@@ -92,9 +99,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Exploration", "+Personal Career", "+Thrill Seeking"),
       mods = List(Moxie + 1),
-      skills = List(
-        pilot.withField("Spacecraft").at(40),
-        profession.withField("Flight Crew").at(30))),
+      skills = List(pilot.withField("Spacecraft").at(40), profession.withField("Flight Crew").at(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -108,15 +114,14 @@ object BackgroundPackages {
         navigation.at(40),
         networking.anyField(30),
         pilot.withField("Spacecraft").at(50),
-        profession.withField("Flight Crew").at(40))),
+        profession.withField("Flight Crew").at(40)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Exploration", "+Personal Career", "+Thrill Seeking"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.REF + 5,
-        r(rand => RepNetworks.chooseAny(rand, +50))),
+      mods = List(Moxie + 1, Aptitude.REF + 5, r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.oneOf("Astrophysics", "Engineering").at(30),
         fray.at(20),
@@ -129,7 +134,10 @@ object BackgroundPackages {
         networking.anyField(30),
         networking.anyField(30),
         pilot.withField("Spacecraft").at(50),
-        profession.withField("Flight Crew").at(50))));
+        profession.withField("Flight Crew").at(50)
+      )
+    )
+  );
 
   val colonistScienceStaff = PackageGroup(
     label = "Colonist: Science Staff",
@@ -138,10 +146,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Hard Work", "+Personal Career", "+Science!"),
       mods = List(Moxie + 1),
-      skills = List(
-        academics.anyField(40),
-        Skills.oneOf(freeFall, freerunning).at(15),
-        investigation.at(30))),
+      skills = List(academics.anyField(40), Skills.oneOf(freeFall, freerunning).at(15), investigation.at(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -155,15 +161,14 @@ object BackgroundPackages {
         investigation.at(40),
         networking.withField("Scientists").at(40),
         profession.withField("Lab Technician").at(30),
-        research.at(40))),
+        research.at(40)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Hard Work", "+Personal Career", "+Science!"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.COG + 5,
-        r(rand => RepNetworks.chooseAny(rand, +50))),
+      mods = List(Moxie + 1, Aptitude.COG + 5, r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(50),
         academics.anyField(40),
@@ -176,7 +181,10 @@ object BackgroundPackages {
         networking.withField("Scientists").at(40),
         profession.withField("Lab Technician").at(30),
         programming.at(35),
-        research.at(40))));
+        research.at(40)
+      )
+    )
+  );
 
   val colonistSecurityStaff = PackageGroup(
     label = "Colonist: Security Staff",
@@ -185,10 +193,10 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Law and Order", "+Survival", "-Criminals", "-Autonomists"),
       mods = List(Moxie + 1),
-      skills = List(
-        beamWeapons.at(40),
-        Skills.oneOf(freeFall, freerunning).at(15),
-        profession.withField("Security Ops").at(30))),
+      skills = List(beamWeapons.at(40),
+                    Skills.oneOf(freeFall, freerunning).at(15),
+                    profession.withField("Security Ops").at(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -202,15 +210,14 @@ object BackgroundPackages {
         intimidation.at(40),
         language.anyField(20),
         networking.anyField(30),
-        profession.withField("Security Ops").at(40))),
+        profession.withField("Security Ops").at(40)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Law and Order", "+Survival", "–Criminals", "–Autonomists"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.SOM + 5,
-        r(rand => RepNetworks.chooseAny(rand, +50))),
+      mods = List(Moxie + 1, Aptitude.SOM + 5, r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(40),
         beamWeapons.at(50),
@@ -223,7 +230,10 @@ object BackgroundPackages {
         language.anyField(30),
         networking.anyField(30),
         profession.withField("Security Ops").at(50),
-        unarmedCombat.at(40))));
+        unarmedCombat.at(40)
+      )
+    )
+  );
 
   val colonistTechStaff = PackageGroup(
     label = "Colonist: Tech Staff",
@@ -232,10 +242,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Hard Work", "+Problem Solving", "+Survival"),
       mods = List(Moxie + 1),
-      skills = List(
-        Skills.oneOf(freeFall, freerunning).at(15),
-        hardware.anyField(40),
-        profession.anyField(30))),
+      skills = List(Skills.oneOf(freeFall, freerunning).at(15), hardware.anyField(40), profession.anyField(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -249,15 +257,14 @@ object BackgroundPackages {
         interfacing.at(40),
         profession.anyField(40),
         programming.at(40),
-        scrounging.at(35))),
+        scrounging.at(35)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Hard Work", "+Problem Solving", "+Survival"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.COG + 5,
-        r(rand => RepNetworks.chooseAny(rand, +50))),
+      mods = List(Moxie + 1, Aptitude.COG + 5, r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         academics.anyField(40),
         fray.at(20),
@@ -270,7 +277,10 @@ object BackgroundPackages {
         pilot.anyField(25),
         profession.anyField(50),
         programming.at(40),
-        scrounging.at(35))));
+        scrounging.at(35)
+      )
+    )
+  );
 
   val drifter = PackageGroup(
     label = "Drifter",
@@ -279,10 +289,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Exploration", "+Hard Work", "+Pragmatism", "+Survival"),
       mods = List(Moxie + 1),
-      skills = List(
-        Skills.oneOf(freeFall, freerunning).at(15),
-        profession.anyField(30),
-        scrounging.at(40))),
+      skills = List(Skills.oneOf(freeFall, freerunning).at(15), profession.anyField(30), scrounging.at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -297,15 +305,14 @@ object BackgroundPackages {
         navigation.at(20),
         networking.anyField(35),
         profession.anyField(40),
-        scrounging.at(50))),
+        scrounging.at(50)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Exploration", "+Hard Work", "+Pragmatism", "+Survival"),
-      mods = List(
-        Moxie + 2,
-        Aptitude.INT + 5,
-        r(rand => RepNetworks.chooseAny(rand, +50))),
+      mods = List(Moxie + 2, Aptitude.INT + 5, r(rand => RepNetworks.chooseAny(rand, +50))),
       skills = List(
         art.anyField(40),
         fray.at(25),
@@ -318,7 +325,10 @@ object BackgroundPackages {
         networking.anyField(30),
         profession.anyField(40),
         protocol.at(20),
-        scrounging.at(50))));
+        scrounging.at(50)
+      )
+    )
+  );
 
   val earthSurvivor = PackageGroup(
     label = "Earth Survivor",
@@ -327,10 +337,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Survival", "+/–Reclaiming Earth", "–TITANs"),
       mods = List(Moxie + 1),
-      skills = List(
-        freerunning.at(15),
-        profession.withField("Post-Apocalyptic Survival").at(30),
-        scrounging.at(40))),
+      skills = List(freerunning.at(15), profession.withField("Post-Apocalyptic Survival").at(30), scrounging.at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -345,15 +353,14 @@ object BackgroundPackages {
         language.anyField(30),
         pilot.withField("Groundcraft").at(20),
         profession.withField("Post-Apocalyptic Survival").at(40),
-        scrounging.at(50))),
+        scrounging.at(50)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Survival", "+/–Reclaiming Earth", "–TITANs"),
-      mods = List(
-        Moxie + 2,
-        Aptitude.WIL + 5,
-        TraitsNegativeEP.neuralDamage),
+      mods = List(Moxie + 2, Aptitude.WIL + 5, TraitsNegativeEP.neuralDamage),
       skills = List(
         animalHandling.at(20),
         demolitions.at(20),
@@ -367,7 +374,10 @@ object BackgroundPackages {
         profession.anyField(40),
         profession.withField("Post-Apocalyptic Survival").at(40),
         scrounging.at(50),
-        seekerWeapons.at(30))));
+        seekerWeapons.at(30)
+      )
+    )
+  );
 
   val fallEvacueeEnclaver = PackageGroup(
     label = "Fall Evacuee: Enclaver",
@@ -376,10 +386,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Personal Career", "+Reclaiming Earth", "+Survival", "+Wealth"),
       mods = List(Moxie + 1),
-      skills = List(
-        academics.anyField(30),
-        profession.anyField(30),
-        protocol.at(25))),
+      skills = List(academics.anyField(30), profession.anyField(30), protocol.at(25))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -393,15 +401,14 @@ object BackgroundPackages {
         persuasion.at(40),
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
-        protocol.at(30))),
+        protocol.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Personal Career", "+Reclaiming Earth", "+Survival", "+Wealth"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.SAV + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+      mods = List(Moxie + 1, Aptitude.SAV + 5, r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.anyField(40),
         art.anyField(30),
@@ -415,7 +422,10 @@ object BackgroundPackages {
         persuasion.at(40),
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
-        protocol.at(40))));
+        protocol.at(40)
+      )
+    )
+  );
 
   val fallEvacueeUnderclass = PackageGroup(
     label = "Fall Evacuee: Underclass",
@@ -424,10 +434,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Personal Development", "+Survival", "–Hypercapitalism"),
       mods = List(Moxie + 1),
-      skills = List(
-        networking.anyField(40),
-        profession.anyField(30),
-        unarmedCombat.at(15))),
+      skills = List(networking.anyField(40), profession.anyField(30), unarmedCombat.at(15))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -442,15 +450,14 @@ object BackgroundPackages {
         persuasion.at(40),
         pilot.withField(" Groundcraft").at(25),
         profession.anyField(40),
-        unarmedCombat.at(20))),
+        unarmedCombat.at(20)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Personal Development", "+Survival", "–Hypercapitalism"),
-      mods = List(
-        Moxie + 2,
-        Aptitude.WIL + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+      mods = List(Moxie + 2, Aptitude.WIL + 5, r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         academics.anyField(30),
         blades.at(30),
@@ -463,7 +470,10 @@ object BackgroundPackages {
         persuasion.at(40),
         pilot.withField(" Groundcraft").at(30),
         profession.anyField(40),
-        unarmedCombat.at(35))));
+        unarmedCombat.at(35)
+      )
+    )
+  );
 
   val hypereliteMedia = PackageGroup(
     label = "Hyperelite: Media Personality",
@@ -471,19 +481,14 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+Artistic Expression", "+Fame", "+Personal Career"),
-      mods = List(
-        Moxie + 1,
-        StartingCredit + 5000),
-      skills = List(
-        art.anyField(40),
-        networking.withField("Media").at(40))),
+      mods = List(Moxie + 1, StartingCredit + 5000),
+      skills = List(art.anyField(40), networking.withField("Media").at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Artistic Expression", "+Fame", "+Personal Career"),
-      mods = List(
-        Moxie + 1,
-        StartingCredit + 30000),
+      mods = List(Moxie + 1, StartingCredit + 30000),
       skills = List(
         art.anyField(40),
         disguise.at(25),
@@ -492,16 +497,14 @@ object BackgroundPackages {
         networking.withField("Media").at(50),
         persuasion.at(30),
         profession.anyField(20),
-        protocol.at(30))),
+        protocol.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Artistic Expression", "+Fame", "+Personal Career"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.SAV + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50)),
-        StartingCredit + 60000),
+      mods = List(Moxie + 1, Aptitude.SAV + 5, r(rand => RepNetworks.chooseAny(rand, 50)), StartingCredit + 60000),
       skills = List(
         art.anyField(40),
         disguise.at(25),
@@ -513,7 +516,10 @@ object BackgroundPackages {
         networking.anyField(20),
         persuasion.at(30),
         profession.anyField(40),
-        protocol.at(50))));
+        protocol.at(50)
+      )
+    )
+  );
 
   val hypereliteScion = PackageGroup(
     label = "Hyperelite: Scion",
@@ -521,20 +527,14 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+Family", "+Hypercapitalism", "+Wealth"),
-      mods = List(
-        Moxie + 1,
-        StartingCredit + 5000),
-      skills = List(
-        academics.anyField(30),
-        kinesics.at(30),
-        protocol.at(20))),
+      mods = List(Moxie + 1, StartingCredit + 5000),
+      skills = List(academics.anyField(30), kinesics.at(30), protocol.at(20))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Family", "+Hypercapitalism", "+Wealth"),
-      mods = List(
-        Moxie + 1,
-        StartingCredit + 20000),
+      mods = List(Moxie + 1, StartingCredit + 20000),
       skills = List(
         academics.anyField(40),
         art.anyField(30),
@@ -543,17 +543,18 @@ object BackgroundPackages {
         kinesics.at(50),
         networking.withField("Hypercorps").at(35),
         persuasion.at(30),
-        protocol.at(30))),
+        protocol.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Family", "+Hypercapitalism", "+Wealth"),
-      mods = List(
-        Moxie + 1,
-        StartingCredit + 50000,
-        TraitsPositiveEP.patron,
-        r(rand => RepNetworks.chooseAny(rand, 50)),
-        Aptitude.SAV + 5),
+      mods = List(Moxie + 1,
+                  StartingCredit + 50000,
+                  TraitsPositiveEP.patron,
+                  r(rand => RepNetworks.chooseAny(rand, 50)),
+                  Aptitude.SAV + 5),
       skills = List(
         academics.anyField(40),
         art.anyField(40),
@@ -564,7 +565,10 @@ object BackgroundPackages {
         networking.withField("Hypercorps").at(40),
         persuasion.at(30),
         profession.anyField(30),
-        protocol.at(40))));
+        protocol.at(40)
+      )
+    )
+  );
 
   val indenture = PackageGroup(
     label = "Indenture",
@@ -573,10 +577,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Hard Work", "+Survival", "–Hypercorps", "–Indentured Service"),
       mods = List(Moxie + 1),
-      skills = List(
-        hardware.anyField(40),
-        language.anyField(15),
-        profession.anyField(30))),
+      skills = List(hardware.anyField(40), language.anyField(15), profession.anyField(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -590,15 +592,14 @@ object BackgroundPackages {
         interest.anyField(20),
         language.anyField(30),
         profession.anyField(40),
-        scrounging.at(45))),
+        scrounging.at(45)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Hard Work", "+Survival", "–Hypercorps", "–Indentured Service"),
-      mods = List(
-        Moxie + 2,
-        Aptitude.SOM + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+      mods = List(Moxie + 2, Aptitude.SOM + 5, r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         blades.at(30),
         demolitions.at(30),
@@ -611,7 +612,10 @@ object BackgroundPackages {
         networking.withField("Criminal").at(20),
         profession.anyField(40),
         profession.anyField(40),
-        scrounging.at(45))));
+        scrounging.at(45)
+      )
+    )
+  );
 
   val infolifeEmergentUplift = PackageGroup(
     label = "Infolife: Emergent Uplift",
@@ -619,25 +623,20 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+AGI Rights", "+Mercurial Cause"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeTranshuman.anomalousMind,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
-      skills = List(
-        interest.anyField(30),
-        infosec.at(25),
-        interfacing.at(40),
-        programming.at(30))),
+      mods = List(Moxie + 1,
+                  TraitsNegativeTranshuman.anomalousMind,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      skills = List(interest.anyField(30), infosec.at(25), interfacing.at(40), programming.at(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+AGI Rights", "+Mercurial Cause"),
-      mods = List(
-        Moxie + 2,
-        TraitsNegativeTranshuman.anomalousMind,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      mods = List(Moxie + 2,
+                  TraitsNegativeTranshuman.anomalousMind,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
       skills = List(
         academics.anyField(30),
         hardware.anyField(40),
@@ -647,7 +646,9 @@ object BackgroundPackages {
         networking.anyField(30),
         profession.anyField(20),
         programming.at(40),
-        research.at(30))),
+        research.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -658,7 +659,8 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.COG + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))
+      ),
       skills = List(
         Skills.chooseAny(30),
         Skills.chooseAny(30),
@@ -670,7 +672,10 @@ object BackgroundPackages {
         networking.anyField(30),
         profession.anyField(40),
         programming.at(40),
-        research.at(35))));
+        research.at(35)
+      )
+    )
+  );
 
   val infolifeHumanities = PackageGroup(
     label = "Infolife: Humanities AGI",
@@ -678,22 +683,18 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+AGI Rights", "+Personal Development", "+Philanthropy"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
-      skills = List(
-        academics.oneOf("Psychology", "Sociology").at(30),
-        interfacing.at(40),
-        kinesics.at(35))),
+      mods = List(Moxie + 1,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      skills = List(academics.oneOf("Psychology", "Sociology").at(30), interfacing.at(40), kinesics.at(35))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+AGI Rights", "+Personal Development", "+Philanthropy"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      mods = List(Moxie + 1,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
       skills = List(
         academics.oneOf("Psychology", "Sociology").at(40),
         art.withField("Digital Art").at(20),
@@ -703,7 +704,9 @@ object BackgroundPackages {
         networking.anyField(30),
         persuasion.at(40),
         profession.withField("Psychotherapy").at(30),
-        research.at(30))),
+        research.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -713,7 +716,8 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.SAV + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))
+      ),
       skills = List(
         academics.oneOf("Psychology", "Sociology").at(40),
         art.withField("Digital Art").at(40),
@@ -726,7 +730,10 @@ object BackgroundPackages {
         persuasion.at(40),
         profession.withField("Psychotherapy").at(30),
         protocol.at(30),
-        research.at(30))));
+        research.at(30)
+      )
+    )
+  );
 
   val infolifeMachine = PackageGroup(
     label = "Infolife: Machine AGI",
@@ -734,22 +741,18 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+AGI Rights", "+Sousveillance", "+Thrill Seeking", "–Disorganization"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
-      skills = List(
-        academics.anyField(30),
-        interfacing.at(40),
-        programming.at(35))),
+      mods = List(Moxie + 1,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      skills = List(academics.anyField(30), interfacing.at(40), programming.at(35))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+AGI Rights", "+Sousveillance", "+Thrill Seeking", "–Disorganization"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      mods = List(Moxie + 1,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
       skills = List(
         academics.anyField(40),
         art.anyField(20),
@@ -759,7 +762,9 @@ object BackgroundPackages {
         interfacing.at(50),
         pilot.anyField(30),
         profession.anyField(30),
-        programming.at(40))),
+        programming.at(40)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -769,7 +774,8 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.REF + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))
+      ),
       skills = List(
         academics.anyField(40),
         academics.anyField(40),
@@ -782,7 +788,10 @@ object BackgroundPackages {
         pilot.anyField(30),
         profession.anyField(40),
         programming.at(50),
-        research.at(30))));
+        research.at(30)
+      )
+    )
+  );
 
   val infolifeResearch = PackageGroup(
     label = "Infolife: Research AGI",
@@ -790,22 +799,18 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+AGI Rights", "+Education", "+Research"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
-      skills = List(
-        academics.anyField(30),
-        interfacing.at(35),
-        research.at(40))),
+      mods = List(Moxie + 1,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      skills = List(academics.anyField(30), interfacing.at(35), research.at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+AGI Rights", "+Education", "+Research"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.realWorldNaivete,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
+      mods = List(Moxie + 1,
+                  TraitsNegativeEP.realWorldNaivete,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)")),
       skills = List(
         academics.anyField(40),
         academics.anyField(30),
@@ -815,7 +820,9 @@ object BackgroundPackages {
         networking.withField("Scientists").at(25),
         profession.anyField(20),
         programming.at(30),
-        research.at(50))),
+        research.at(50)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -825,7 +832,8 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (AGI)"),
         Aptitude.COG + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))
+      ),
       skills = List(
         academics.anyField(40),
         academics.anyField(40),
@@ -838,7 +846,10 @@ object BackgroundPackages {
         pilot.anyField(30),
         profession.anyField(40),
         programming.at(40),
-        research.at(50))));
+        research.at(50)
+      )
+    )
+  );
 
   val isolateSeparatist = PackageGroup(
     label = "Isolate: Separatist",
@@ -847,10 +858,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Artistic Expression", "+Bioconservatism", "+Religion", "+Research"),
       mods = List(Moxie + 1),
-      skills = List(
-        freeFall.at(15),
-        profession.anyField(30),
-        scrounging.at(40))),
+      skills = List(freeFall.at(15), profession.anyField(30), scrounging.at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -864,15 +873,14 @@ object BackgroundPackages {
         medicine.withField("Paramedic").at(30),
         pilot.anyField(30),
         profession.anyField(50),
-        scrounging.at(40))),
+        scrounging.at(40)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Artistic Expression", "+Bioconservatism", "+Religion", "+Research"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.realWorldNaivete,
-        PickOne(Aptitude.COG, Aptitude.WIL).mapPC(_ + 5)),
+      mods = List(Moxie + 1, TraitsNegativeEP.realWorldNaivete, PickOne(Aptitude.COG, Aptitude.WIL).mapPC(_ + 5)),
       skills = List(
         academics.anyField(30),
         animalHandling.at(25),
@@ -886,7 +894,10 @@ object BackgroundPackages {
         pilot.anyField(40),
         profession.anyField(50),
         programming.at(30),
-        scrounging.at(50))));
+        scrounging.at(50)
+      )
+    )
+  );
 
   val isolateSurvivalist = PackageGroup(
     label = "Isolate: Survivalist",
@@ -895,10 +906,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Bioconservatism", "+Religion", "+Survival", "–Autonomists"),
       mods = List(Moxie + 1),
-      skills = List(
-        freeFall.at(15),
-        profession.anyField(30),
-        kineticWeapons.at(40))),
+      skills = List(freeFall.at(15), profession.anyField(30), kineticWeapons.at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -913,14 +922,14 @@ object BackgroundPackages {
         medicine.withField("Paramedic").at(30),
         pilot.anyField(30),
         profession.anyField(40),
-        seekerWeapons.at(15))),
+        seekerWeapons.at(15)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Bioconservatism", "+Religion", "+Survival", "–Autonomists"),
-      mods = List(
-        Moxie + 1,
-        PickOne(Aptitude.INT, Aptitude.WIL).mapPC(_ + 5)),
+      mods = List(Moxie + 1, PickOne(Aptitude.INT, Aptitude.WIL).mapPC(_ + 5)),
       skills = List(
         academics.anyField(30),
         animalHandling.at(20),
@@ -935,7 +944,10 @@ object BackgroundPackages {
         pilot.anyField(30),
         profession.anyField(40),
         profession.anyField(40),
-        seekerWeapons.at(25))));
+        seekerWeapons.at(25)
+      )
+    )
+  );
 
   val lostDisturbed = PackageGroup(
     label = "Lost: Disturbed Child",
@@ -952,11 +964,10 @@ object BackgroundPackages {
         TraitsNegativeEP.onTheRun,
         TraitsNegativeEP.realWorldNaivete,
         CharacterMod.BecomeAsync,
-        Sleights.PsiGamma + 2),
-      skills = List(
-        academics.anyField(30),
-        control.at(35),
-        freeFall.at(15))),
+        Sleights.PsiGamma + 2
+      ),
+      skills = List(academics.anyField(30), control.at(35), freeFall.at(15))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -971,7 +982,8 @@ object BackgroundPackages {
         TraitsNegativeEP.realWorldNaivete,
         CharacterMod.BecomeAsync,
         Sleights.PsiChi + 1,
-        Sleights.PsiGamma + 3),
+        Sleights.PsiGamma + 3
+      ),
       skills = List(
         academics.anyField(40),
         blades.at(15),
@@ -981,7 +993,9 @@ object BackgroundPackages {
         freeFall.at(30),
         infiltration.at(30),
         language.anyField(30),
-        profession.anyField(20))),
+        profession.anyField(20)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -998,7 +1012,8 @@ object BackgroundPackages {
         Sleights.PsiChi + 2,
         Sleights.PsiGamma + 5,
         Aptitude.WIL + 5,
-        r(RepNetworks.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))
+      ),
       skills = List(
         academics.anyField(40),
         blades.at(20),
@@ -1011,7 +1026,10 @@ object BackgroundPackages {
         language.anyField(30),
         profession.anyField(40),
         psiAssault.at(40),
-        unarmedCombat.at(20))));
+        unarmedCombat.at(20)
+      )
+    )
+  );
 
   val lostMasked = PackageGroup(
     label = "Lost: Masked Normalcy",
@@ -1019,35 +1037,32 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+Acceptance", "+Privacy", "+Self Control"),
-      mods = List(
-        Moxie + 1,
-        TraitsPositiveEP.psi1,
-        rpc(Disorders.roll(_)),
-        rpc(Disorders.roll(_)),
-        CharacterMod.BecomeAsync,
-        Sleights.PsiChi + 2),
-      skills = List(
-        academics.anyField(30),
-        persuasion.at(35))),
+      mods = List(Moxie + 1,
+                  TraitsPositiveEP.psi1,
+                  rpc(Disorders.roll(_)),
+                  rpc(Disorders.roll(_)),
+                  CharacterMod.BecomeAsync,
+                  Sleights.PsiChi + 2),
+      skills = List(academics.anyField(30), persuasion.at(35))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Acceptance", "+Privacy", "+Self Control"),
-      mods = List(
-        Moxie + 1,
-        TraitsPositiveEP.psi1,
-        rpc(Disorders.roll(_)),
-        rpc(Disorders.roll(_)),
-        CharacterMod.BecomeAsync,
-        Sleights.PsiChi + 4),
-      skills = List(
-        academics.anyField(40),
-        freeFall.at(30),
-        impersonation.at(40),
-        kinesics.at(45),
-        language.anyField(30),
-        persuasion.at(50),
-        profession.anyField(20))),
+      mods = List(Moxie + 1,
+                  TraitsPositiveEP.psi1,
+                  rpc(Disorders.roll(_)),
+                  rpc(Disorders.roll(_)),
+                  CharacterMod.BecomeAsync,
+                  Sleights.PsiChi + 4),
+      skills = List(academics.anyField(40),
+                    freeFall.at(30),
+                    impersonation.at(40),
+                    kinesics.at(45),
+                    language.anyField(30),
+                    persuasion.at(50),
+                    profession.anyField(20))
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -1062,7 +1077,8 @@ object BackgroundPackages {
         Sleights.PsiChi + 4,
         Sleights.PsiGamma + 2,
         TraitsNegativeEP.onTheRun,
-        r(RepNetworks.chooseAny(_, +50))),
+        r(RepNetworks.chooseAny(_, +50))
+      ),
       skills = List(
         academics.anyField(40),
         fray.at(20),
@@ -1075,7 +1091,10 @@ object BackgroundPackages {
         persuasion.at(50),
         profession.anyField(30),
         protocol.at(30),
-        sense.at(50))));
+        sense.at(50)
+      )
+    )
+  );
 
   val originalScum = PackageGroup(
     label = "Isolate: Survivalist",
@@ -1084,10 +1103,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Anarchism", "+Hedonism", "+Individualism", "+Morphological Freedom"),
       mods = List(Moxie + 1),
-      skills = List(
-        art.anyField(30),
-        freeFall.at(15),
-        medicine.withField("Biosculpting").at(40))),
+      skills = List(art.anyField(30), freeFall.at(15), medicine.withField("Biosculpting").at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -1101,15 +1118,14 @@ object BackgroundPackages {
         medicine.withField("Biosculpting").at(50),
         networking.anyField(35),
         persuasion.at(40),
-        psychosurgery.at(40))),
+        psychosurgery.at(40)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Anarchism", "+Hedonism", "+Individualism", "+Morphological Freedom"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.WIL + 5,
-        r(RepNetworks.chooseAny(_, +50))),
+      mods = List(Moxie + 1, Aptitude.WIL + 5, r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         art.anyField(40),
         fray.at(20),
@@ -1123,7 +1139,10 @@ object BackgroundPackages {
         persuasion.at(40),
         profession.anyField(30),
         psychosurgery.at(40),
-        sprayWeapons.at(20))));
+        sprayWeapons.at(20)
+      )
+    )
+  );
 
   val reinstantiatedCivilian = PackageGroup(
     label = "Re-instantiated: Civilian Casualty",
@@ -1132,10 +1151,9 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Reclaiming Earth", "+Survival", "-TITAN Tech"),
       mods = List(Moxie + 1),
-      skills = List(
-        Skills.chooseOnly(40, SkillFilter.Not(SkillCategory.Psi)),
-        interfacing.at(15),
-        profession.anyField(30))),
+      skills =
+        List(Skills.chooseOnly(40, SkillFilter.Not(SkillCategory.Psi)), interfacing.at(15), profession.anyField(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -1149,15 +1167,14 @@ object BackgroundPackages {
         networking.anyField(40),
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
-        research.at(30))),
+        research.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Reclaiming Earth", "+Survival", "-TITAN Tech"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.INT + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+      mods = List(Moxie + 1, Aptitude.INT + 5, r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         Skills.chooseOnly(50, SkillFilter.Not(SkillCategory.Psi)),
         academics.anyField(40),
@@ -1171,7 +1188,10 @@ object BackgroundPackages {
         networking.anyField(40),
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
-        research.at(30))));
+        research.at(30)
+      )
+    )
+  );
 
   val reinstantiatedInformorph = PackageGroup(
     label = "Re-instantiated: Infomorph",
@@ -1180,10 +1200,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Reclaiming Earth", "+Survival", "+/–Virtual Reality", "–TITANs"),
       mods = List(Moxie + 1),
-      skills = List(
-        interfacing.at(40),
-        profession.anyField(30),
-        programming.at(15))),
+      skills = List(interfacing.at(40), profession.anyField(30), programming.at(15))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -1197,16 +1215,15 @@ object BackgroundPackages {
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
         programming.at(45),
-        research.at(30))),
+        research.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Reclaiming Earth", "+Survival", "+/–Virtual Reality", "–TITANs"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.editedMemories,
-        Aptitude.COG + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+      mods =
+        List(Moxie + 1, TraitsNegativeEP.editedMemories, Aptitude.COG + 5, r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         Skills.chooseOnly(40, SkillFilter.Not(SkillCategory.Psi)),
         academics.anyField(30),
@@ -1219,7 +1236,10 @@ object BackgroundPackages {
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
         programming.at(45),
-        research.at(30))));
+        research.at(30)
+      )
+    )
+  );
 
   val reinstantiatedMilitary = PackageGroup(
     label = "Re-instantiated: Military Casualty",
@@ -1228,10 +1248,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Reclaiming Earth", "+Survival", "–TITANs"),
       mods = List(Moxie + 1),
-      skills = List(
-        Skills.chooseOnly(40, SkillCategory.Combat),
-        freerunning.at(15),
-        profession.anyField(30))),
+      skills = List(Skills.chooseOnly(40, SkillCategory.Combat), freerunning.at(15), profession.anyField(30))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -1246,16 +1264,15 @@ object BackgroundPackages {
         interest.anyField(30),
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
-        unarmedCombat.at(30))),
+        unarmedCombat.at(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Reclaiming Earth", "+Survival", "–TITANs"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.editedMemories,
-        Aptitude.INT + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+      mods =
+        List(Moxie + 1, TraitsNegativeEP.editedMemories, Aptitude.INT + 5, r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         Skills.chooseOnly(50, SkillCategory.Combat),
         Skills.chooseOnly(50, SkillCategory.Combat),
@@ -1268,7 +1285,10 @@ object BackgroundPackages {
         language.anyField(30),
         pilot.withField("Groundcraft").at(15),
         profession.anyField(40),
-        unarmedCombat.at(40))));
+        unarmedCombat.at(40)
+      )
+    )
+  );
 
   val streetRat = PackageGroup(
     label = "Street Rat",
@@ -1277,10 +1297,8 @@ object BackgroundPackages {
       level = PackageLevel.Basic,
       motivations = List("+Black Markets", "+Cartel/Gang/Family", "+Survival", "+Wealth", "–Law and Order", "–Police"),
       mods = List(Moxie + 1),
-      skills = List(
-        networking.withField("Criminals").at(15),
-        profession.anyField(30),
-        unarmedCombat.at(40))),
+      skills = List(networking.withField("Criminals").at(15), profession.anyField(30), unarmedCombat.at(40))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -1296,15 +1314,14 @@ object BackgroundPackages {
         networking.withField("Criminals").at(30),
         pilot.withField("Groundcraft").at(30),
         profession.anyField(30),
-        unarmedCombat.at(40))),
+        unarmedCombat.at(40)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Black Markets", "+Cartel/Gang/Family", "+Survival", "+Wealth", "–Law and Order", "–Police"),
-      mods = List(
-        Moxie + 1,
-        Aptitude.SOM + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+      mods = List(Moxie + 1, Aptitude.SOM + 5, r(rand => RepNetworks.chooseAny(rand, 50))),
       skills = List(
         clubs.at(30),
         deception.at(25),
@@ -1318,7 +1335,10 @@ object BackgroundPackages {
         palming.at(20),
         pilot.withField("Groundcraft").at(30),
         profession.anyField(40),
-        unarmedCombat.at(40))));
+        unarmedCombat.at(40)
+      )
+    )
+  );
 
   val upliftEscapee = PackageGroup(
     label = "Uplift: Escapee",
@@ -1326,21 +1346,18 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+Privacy", "+Survival", "+Uplift Rights", "–Hypercorps", "–Uplift Slavery"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)")),
-      skills = List(
-        Skills.oneOf(climbing, swimming, flight, freerunning).at(40), // TODO technically based on uplift type
-        interest.anyField(30),
-        infiltration.at(25))),
+      mods = List(Moxie + 1, TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)")),
+      skills =
+        List(Skills.oneOf(climbing, swimming, flight, freerunning).at(40), // TODO technically based on uplift type
+             interest.anyField(30),
+             infiltration.at(25))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Privacy", "+Survival", "+Uplift Rights", "–Hypercorps", "–Uplift Slavery"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
-        TraitsNegativeEP.onTheRun),
+      mods =
+        List(Moxie + 1, TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"), TraitsNegativeEP.onTheRun),
       skills = List(
         Skills.oneOf(climbing, swimming, flight, freerunning).at(45), // TODO technically based on uplift type
         deception.at(40),
@@ -1349,7 +1366,9 @@ object BackgroundPackages {
         interest.anyField(40),
         language.anyField(20),
         networking.anyField(40),
-        profession.anyField(30))),
+        profession.anyField(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -1359,7 +1378,8 @@ object BackgroundPackages {
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
         TraitsNegativeEP.onTheRun,
         Aptitude.SAV + 5,
-        r(rand => RepNetworks.chooseAny(rand, 50))),
+        r(rand => RepNetworks.chooseAny(rand, 50))
+      ),
       skills = List(
         academics.anyField(40),
         Skills.oneOf(climbing, swimming, flight, freerunning).at(50), // TODO technically based on uplift type
@@ -1372,7 +1392,10 @@ object BackgroundPackages {
         networking.anyField(40),
         palming.at(25),
         profession.anyField(30),
-        unarmedCombat.at(30))));
+        unarmedCombat.at(30)
+      )
+    )
+  );
 
   val upliftFeral = PackageGroup(
     label = "Uplift: Feral",
@@ -1384,11 +1407,13 @@ object BackgroundPackages {
         Moxie + 1,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
         TraitsNegativeTranshuman.anomalousMind,
-        TraitsPositiveTranshuman.heighenedInstinct),
-      skills = List(
-        Skills.oneOf(climbing, swimming, flight, freerunning).at(40), // TODO technically based on uplift type
-        interest.anyField(30),
-        unarmedCombat.at(35))),
+        TraitsPositiveTranshuman.heighenedInstinct
+      ),
+      skills =
+        List(Skills.oneOf(climbing, swimming, flight, freerunning).at(40), // TODO technically based on uplift type
+             interest.anyField(30),
+             unarmedCombat.at(35))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
@@ -1397,14 +1422,17 @@ object BackgroundPackages {
         Moxie + 2,
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
         TraitsNegativeTranshuman.anomalousMind,
-        TraitsPositiveTranshuman.heighenedInstinct),
+        TraitsPositiveTranshuman.heighenedInstinct
+      ),
       skills = List(
         Skills.oneOf(climbing, swimming, flight, freerunning).at(50), // TODO technically based on uplift type
         fray.at(40),
         infiltration.at(20),
         interest.anyField(45),
         intimidation.anyField(40),
-        unarmedCombat.at(50))),
+        unarmedCombat.at(50)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
@@ -1414,7 +1442,8 @@ object BackgroundPackages {
         TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
         TraitsNegativeTranshuman.anomalousMind,
         TraitsPositiveTranshuman.heighenedInstinct,
-        Aptitude.REF + 5),
+        Aptitude.REF + 5
+      ),
       skills = List(
         art.anyField(30),
         Skills.oneOf(climbing, swimming, flight, freerunning).at(50), // TODO technically based on uplift type
@@ -1424,7 +1453,10 @@ object BackgroundPackages {
         intimidation.at(50),
         networking.anyField(30),
         scrounging.at(20),
-        unarmedCombat.at(50))));
+        unarmedCombat.at(50)
+      )
+    )
+  );
 
   val upliftStandard = PackageGroup(
     label = "Uplift: Standard Specimen",
@@ -1432,20 +1464,17 @@ object BackgroundPackages {
       label = "1PP",
       level = PackageLevel.Basic,
       motivations = List("+Mercurial Cause", "+Sapient Cause", "+Uplift Rights", "–Uplift Slavery"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)")),
-      skills = List(
-        academics.anyField(30),
-        Skills.oneOf(climbing, swimming, flight, freerunning).at(45), // TODO technically based on uplift type
-        interfacing.at(20))),
+      mods = List(Moxie + 1, TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)")),
+      skills =
+        List(academics.anyField(30),
+             Skills.oneOf(climbing, swimming, flight, freerunning).at(45), // TODO technically based on uplift type
+             interfacing.at(20))
+    ),
     influential = BackgroundPackage(
       label = "3PP",
       level = PackageLevel.Influential,
       motivations = List("+Mercurial Cause", "+Sapient Cause", "+Uplift Rights", "–Uplift Slavery"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)")),
+      mods = List(Moxie + 1, TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)")),
       skills = List(
         academics.anyField(40),
         Skills.oneOf(climbing, swimming, flight, freerunning).at(50), // TODO technically based on uplift type
@@ -1455,16 +1484,17 @@ object BackgroundPackages {
         intimidation.at(30),
         kinesics.at(35),
         networking.anyField(40),
-        profession.anyField(30))),
+        profession.anyField(30)
+      )
+    ),
     formative = BackgroundPackage(
       label = "5PP",
       level = PackageLevel.Formative,
       motivations = List("+Mercurial Cause", "+Sapient Cause", "+Uplift Rights", "–Uplift Slavery"),
-      mods = List(
-        Moxie + 1,
-        TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
-        Aptitude.COG + 5,
-        r(RepNetworks.chooseAny(_, +50))),
+      mods = List(Moxie + 1,
+                  TraitsNegativeEP.socialStigma.copy(name = "Social Stigma (Uplift)"),
+                  Aptitude.COG + 5,
+                  r(RepNetworks.chooseAny(_, +50))),
       skills = List(
         academics.anyField(40),
         Skills.oneOf(climbing, swimming, flight, freerunning).at(50), // TODO technically based on uplift type
@@ -1478,5 +1508,8 @@ object BackgroundPackages {
         persuasion.at(30),
         profession.anyField(40),
         protocol.at(30),
-        unarmedCombat.at(20))));
+        unarmedCombat.at(20)
+      )
+    )
+  );
 }

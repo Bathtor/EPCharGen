@@ -1,6 +1,6 @@
 package com.lkroll.ep.chargen.creationpackages
 
-import com.lkroll.ep.compendium.{ MorphType, MorphModel }
+import com.lkroll.ep.compendium.{MorphModel, MorphType}
 import com.lkroll.ep.chargen.Random
 import com.lkroll.ep.chargen.utils._
 import com.lkroll.ep.compendium.data._
@@ -15,11 +15,19 @@ object MorphFilter {
     }
   }
   case object Uplift extends MorphFilter {
-    lazy val uplifts = List(MorphsMN.neoAvian, MorphsMN.neoHominid, MorphsOR.octomorph,
-      MorphsMN.neoNeanderthal, MorphsMN.neoBeluga,
-      MorphsMN.neoDolphin, MorphsMN.neoGorilla,
-      MorphsMN.neoOrca, MorphsMN.neoPig,
-      MorphsMN.neoPorpoise, MorphsMN.neoWhale).map(_.name);
+    lazy val uplifts = List(
+      MorphsMN.neoAvian,
+      MorphsMN.neoHominid,
+      MorphsOR.octomorph,
+      MorphsMN.neoNeanderthal,
+      MorphsMN.neoBeluga,
+      MorphsMN.neoDolphin,
+      MorphsMN.neoGorilla,
+      MorphsMN.neoOrca,
+      MorphsMN.neoPig,
+      MorphsMN.neoPorpoise,
+      MorphsMN.neoWhale
+    ).map(_.name);
 
     def matches(morph: MorphModel): Boolean = {
       uplifts.contains(morph.name)
@@ -55,12 +63,13 @@ object ChoosingAMorph {
 
   def randMorph(rand: Random): MorphModel = data.randomElement(rand).get;
 
-  lazy val data: RollTableLike[MorphModel] = RollSubTables(RollTable(
-    (1 to 50) -> biomorphs,
-    (51 to 55) -> uplifts,
-    (56 to 65) -> pods,
-    (66 to 95) -> synthmorphs,
-    (96 to 100) -> infomorphs));
+  lazy val data: RollTableLike[MorphModel] = RollSubTables(
+    RollTable((1 to 50) -> biomorphs,
+              (51 to 55) -> uplifts,
+              (56 to 65) -> pods,
+              (66 to 95) -> synthmorphs,
+              (96 to 100) -> infomorphs)
+  );
   lazy val biomorphs: RollTable[MorphModel] = RollTable(
     (1 to 3) -> MorphsDF.flat,
     (4 to 13) -> MorphsS.splicer,
@@ -97,7 +106,8 @@ object ChoosingAMorph {
     (93 to 93) -> MorphsGL.grey,
     (94 to 95) -> MorphsMN.nomad,
     (96 to 99) -> MorphsOR.observer,
-    (100 to 100) -> MorphsTX.theseus);
+    (100 to 100) -> MorphsTX.theseus
+  );
   lazy val uplifts: RollTable[MorphModel] = RollTable(
     (1 to 30) -> MorphsMN.neoAvian,
     (31 to 50) -> MorphsMN.neoHominid,
@@ -109,7 +119,8 @@ object ChoosingAMorph {
     (93 to 93) -> MorphsMN.neoOrca,
     (94 to 98) -> MorphsMN.neoPig,
     (99 to 99) -> MorphsMN.neoPorpoise,
-    (100 to 100) -> MorphsMN.neoWhale);
+    (100 to 100) -> MorphsMN.neoWhale
+  );
   lazy val pods: RollTable[MorphModel] = RollTable(
     (1 to 15) -> MorphsOR.pleasurePod,
     (16 to 30) -> MorphsTX.workerPod,
@@ -130,7 +141,8 @@ object ChoosingAMorph {
     (76 to 83) -> MorphsS.securityPod,
     (84 to 86) -> MorphsS.spaceMarine,
     (87 to 95) -> MorphsS.specialistPod,
-    (96 to 100) -> MorphsTX.vacuumPod);
+    (96 to 100) -> MorphsTX.vacuumPod
+  );
   lazy val synthmorphs: RollTable[MorphModel] = RollTable(
     (1 to 20) -> MorphsAC.`case`,
     (21 to 35) -> MorphsS.synth,
@@ -171,7 +183,8 @@ object ChoosingAMorph {
     (96 to 96) -> MorphsOR.roverSpaceFighter,
     (97 to 97) -> MorphsS.smartSwarmanoid,
     (98 to 99) -> MorphsS.sphere,
-    (100 to 100) -> MorphsS.synthtaur);
+    (100 to 100) -> MorphsS.synthtaur
+  );
   lazy val infomorphs: RollTable[MorphModel] = RollTable(
     (1 to 50) -> MorphsGL.infomorph,
     (51 to 57) -> MorphsGL.agent,
@@ -181,5 +194,6 @@ object ChoosingAMorph {
     (82 to 85) -> MorphsGL.sage,
     (86 to 92) -> MorphsGL.scholar,
     (93 to 93) -> MorphsGL.slave,
-    (94 to 100) -> MorphsGL.wirehead);
+    (94 to 100) -> MorphsGL.wirehead
+  );
 }

@@ -26,19 +26,21 @@ object Traits extends Table {
   implicit def traitlist2map(l: List[EPTrait]): Map[Int, EPTrait] = l.map(t => (t.cp -> t)).toMap;
   implicit def trait2group(t: EPTrait): TraitGroup = TraitGroup(t.name, List(t));
 
-  val data: RollTable[TraitChoice] = RollTable(
-    (1 to 4) -> PositiveEgoTrait,
-    (5 to 5) -> PositiveMorphTrait,
-    (6 to 9) -> NegativeEgoTrait,
-    (10 to 10) -> NegativeMorphTrait);
+  val data: RollTable[TraitChoice] = RollTable((1 to 4) -> PositiveEgoTrait,
+                                               (5 to 5) -> PositiveMorphTrait,
+                                               (6 to 9) -> NegativeEgoTrait,
+                                               (10 to 10) -> NegativeMorphTrait);
 
   val dataNegativeEgo: RollTable[TraitGroup] = RollTable(
-    (1 to 2) -> TraitGroup("Addiction", List(TraitsNegativeEP.addictionMinor, TraitsNegativeEP.addictionModerate, TraitsNegativeEP.addictionMajor)),
+    (1 to 2) -> TraitGroup(
+      "Addiction",
+      List(TraitsNegativeEP.addictionMinor, TraitsNegativeEP.addictionModerate, TraitsNegativeEP.addictionMajor)
+    ),
     (3 to 4) -> TraitsNegativeTranshuman.anomalousMind,
     (5 to 5) -> TraitsNegativeEP.badLuck,
     (6 to 6) -> TraitsNegativeTranshuman.beta,
     (7 to 8) -> TraitGroup("Blacklisted", List(TraitsNegativeEP.blacklistedOther, TraitsNegativeEP.blacklistedOwn))
-  // TODO finish negative traits
+    // TODO finish negative traits
   );
 
   override def label: String = "Traits";

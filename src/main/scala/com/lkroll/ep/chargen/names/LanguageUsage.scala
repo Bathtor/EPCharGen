@@ -6,7 +6,9 @@ import com.lkroll.ep.compendium.data.Languages
 object NameUsageCode extends Enumeration {
   type NameUsageCode = Value;
 
-  val afk, ara, ben, bur, chi, cze, dan, dut, eng, est, fin, fre, ger, gre, grea, heb, hin, ice, ins, ira, ita, jap, jav, khm, kor, kur, mly, nor, per, pol, por, pun, rmn, roma, romm, rus, ser, slk, spa, swa, swe, tag, tam, tha, tur, urd, vie, xho, zul = Value;
+  val afk, ara, ben, bur, chi, cze, dan, dut, eng, est, fin, fre, ger, gre, grea, heb, hin, ice, ins, ira, ita, jap,
+      jav, khm, kor, kur, mly, nor, per, pol, por, pun, rmn, roma, romm, rus, ser, slk, spa, swa, swe, tag, tam, tha,
+      tur, urd, vie, xho, zul = Value;
 
   def toQuery(code: NameUsageCode): String = code.toString();
 }
@@ -56,18 +58,18 @@ object LanguageUsage {
       case Slovak        => List(slk)
       case Spanish       => List(spa)
       //        object Suryan extends LangName("Suryan") NO CLUE
-      case Swahili       => List(swa)
-      case Swedish       => List(swe)
-      case Tagalog       => List(tag)
-      case Tamil         => List(tam)
-      case Thai          => List(tha)
-      case Turkish       => List(tur, kur)
-      case Urdu          => List(urd)
-      case Vietnamese    => List(vie)
-      case Wu            => List(chi)
-      case Xhosa         => List(xho)
-      case Zulu          => List(zul)
-      case _             => Nil
+      case Swahili    => List(swa)
+      case Swedish    => List(swe)
+      case Tagalog    => List(tag)
+      case Tamil      => List(tam)
+      case Thai       => List(tha)
+      case Turkish    => List(tur, kur)
+      case Urdu       => List(urd)
+      case Vietnamese => List(vie)
+      case Wu         => List(chi)
+      case Xhosa      => List(xho)
+      case Zulu       => List(zul)
+      case _          => Nil
     }
   }
 }

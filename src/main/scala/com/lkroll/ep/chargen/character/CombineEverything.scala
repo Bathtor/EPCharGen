@@ -2,7 +2,7 @@ package com.lkroll.ep.chargen.character
 
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ Aptitude, AptitudeValues, EPTrait, Motivation, TraitType, RepNetwork, SkillCategory }
+import com.lkroll.ep.compendium.{Aptitude, AptitudeValues, EPTrait, Motivation, RepNetwork, SkillCategory, TraitType}
 import scala.collection.mutable
 
 import scala.language.postfixOps
@@ -14,7 +14,8 @@ object CombineEverything {
 
   def apply(rand: Random, char: CharGenCharacter, allowMoxie: Boolean): CombinationResult = {
     var log: List[String] = Nil;
-    val fixedApts = char.aptitudes.copy(morphBoni = char.activeMorph.aptitudeBonus, morphMax = char.activeMorph.aptitudeMax);
+    val fixedApts =
+      char.aptitudes.copy(morphBoni = char.activeMorph.aptitudeBonus, morphMax = char.activeMorph.aptitudeMax);
     log ::= "Applied Morph Apts";
     val fixedSkills = fixSkills(rand, char.skills, char.aptitudes.base);
     log ::= "Fixed Skills";
@@ -48,12 +49,11 @@ object CombineEverything {
     }
     log ::= "Sunk remaining CP into Skills";
 
-    val newChar = char.copy(
-      moxie = moxie,
-      aptitudes = fixedApts,
-      rep = finalRep,
-      skills = finalSkills,
-      motivations = finalMotivations);
+    val newChar = char.copy(moxie = moxie,
+                            aptitudes = fixedApts,
+                            rep = finalRep,
+                            skills = finalSkills,
+                            motivations = finalMotivations);
     CombinationResult(newChar, log.reverse)
   }
 
@@ -78,12 +78,12 @@ object CombineEverything {
   private val combineOrSwitch: RollTable[DuplicateSkillChoice] = RollTable(
     (1 to 5) -> DuplicateSkillChoice.Combine,
     (6 to 9) -> DuplicateSkillChoice.Switch,
-    (10 to 10) -> DuplicateSkillChoice.SwitchAny);
+    (10 to 10) -> DuplicateSkillChoice.SwitchAny
+  );
 
-  private val reduceSkill: RollTable[SkillReductionChoice] = RollTable(
-    (1 to 3) -> SkillReductionChoice.SplitInHalf,
-    (4 to 7) -> SkillReductionChoice.ReduceTo60,
-    (8 to 10) -> SkillReductionChoice.SplitMax);
+  private val reduceSkill: RollTable[SkillReductionChoice] = RollTable((1 to 3) -> SkillReductionChoice.SplitInHalf,
+                                                                       (4 to 7) -> SkillReductionChoice.ReduceTo60,
+                                                                       (8 to 10) -> SkillReductionChoice.SplitMax);
 
   private def sinkCPIntoSkills(rand: Random, cp: Int, skills: List[Skill], apts: AptitudeValues): (List[Skill], Int) = {
     require(cp > 0);
@@ -120,10 +120,13 @@ object CombineEverything {
   private def pickNewSkill(rand: Random, skills: List[Skill]): Option[Skills.Skill] = {
     // this is fucking expensive, but oh well...
     val options = Skills.Defaults.list
-      .flatMap(s => s.sampleFields match {
-        case Some(sampleFields) => sampleFields.map(field => s.withField(field))
-        case None               => Array(s)
-      })
+      .flatMap(
+        s =>
+          s.sampleFields match {
+            case Some(sampleFields) => sampleFields.map(field => s.withField(field))
+            case None               => Array(s)
+          }
+      )
       .filter(s1 => skills.forall(s2 => !s1.matches(s2.skillDef)));
     if (options.isEmpty) {
       None
@@ -152,7 +155,10 @@ object CombineEverything {
     chosenSkills
   }
 
-  private def makeChoice(rand: Random, choice: SkillOrFieldChoice, skills: List[Skill], apts: AptitudeValues): (Skill, List[SkillOrFieldChoice]) = {
+  private def makeChoice(rand: Random,
+                         choice: SkillOrFieldChoice,
+                         skills: List[Skill],
+                         apts: AptitudeValues): (Skill, List[SkillOrFieldChoice]) = {
     choice match {
       case SkillChoice(ranks, None) => {
         val options = Skills.Defaults.list.filterNot(s => skills.exists(_.name == s.name) && s.field.isEmpty);
@@ -164,7 +170,9 @@ object CombineEverything {
         } else {
           skillDef.sampleFields match {
             case Some(sampleFields) => {
-              val fieldOptions = sampleFields.filterNot(field => skills.exists(s => (s.name == skillDef.name) && (s.field.get == field)));
+              val fieldOptions = sampleFields.filterNot(
+                field => skills.exists(s => (s.name == skillDef.name) && (s.field.get == field))
+              );
               if (fieldOptions.isEmpty) {
                 limitSkill(rand, skillDef.withField("Pick-A-Field").instance(ranks), apts)
               } else {
@@ -179,7 +187,9 @@ object CombineEverything {
         }
       }
       case SkillChoice(ranks, Some(cat)) => {
-        val options = Skills.Defaults.list.filter(_.category == cat).filterNot(s => skills.exists(_.name == s.name) && s.field.isEmpty);
+        val options = Skills.Defaults.list
+          .filter(_.category == cat)
+          .filterNot(s => skills.exists(_.name == s.name) && s.field.isEmpty);
         if (options.isEmpty) {
           makeChoice(rand, SkillChoice(ranks, None), skills, apts)
         } else {
@@ -190,7 +200,9 @@ object CombineEverything {
           } else {
             skillDef.sampleFields match {
               case Some(sampleFields) => {
-                val fieldOptions = sampleFields.filterNot(field => skills.exists(s => (s.name == skillDef.name) && (s.field.get == field)));
+                val fieldOptions = sampleFields.filterNot(
+                  field => skills.exists(s => (s.name == skillDef.name) && (s.field.get == field))
+                );
                 if (fieldOptions.isEmpty) {
                   makeChoice(rand, SkillChoice(ranks, None), skills, apts)
                 } else {
@@ -211,7 +223,9 @@ object CombineEverything {
         } else {
           skillDef.sampleFields match {
             case Some(sampleFields) => {
-              val fieldOptions = sampleFields.filterNot(field => skills.exists(s => (s.name == skillDef.name) && (s.field.get == field)));
+              val fieldOptions = sampleFields.filterNot(
+                field => skills.exists(s => (s.name == skillDef.name) && (s.field.get == field))
+              );
               if (fieldOptions.isEmpty) {
                 makeChoice(rand, SkillChoice(ranks, Some(skillDef.category)), skills, apts)
               } else {
@@ -283,48 +297,51 @@ object CombineEverything {
     val noduplicates = grouped.foldLeft(List.empty[Skill]) { (acc, e) =>
       e match {
         case (_, skill :: Nil) => skill :: acc
-        case (_, sameNameSkills) => if (sameNameSkills.head.field.isDefined) {
-          val fieldGrouped = sameNameSkills.groupBy(_.field.get);
-          val noduplicates = fieldGrouped.foldLeft(List.empty[Skill]) { (fieldAcc, fieldE) =>
-            fieldE match {
-              case (_, fieldSkill :: Nil) => fieldSkill :: fieldAcc
-              case (_, sameFieldSkills) => {
-                val head :: rest = sameFieldSkills;
-                val fieldSkill = rest.foldLeft(head){ (sacc, s) =>
-                  combineOrSwitch.randomElement(rand).get match {
-                    case DuplicateSkillChoice.Combine => sacc.copy(ranks = sacc.ranks + s.ranks, specs = sacc.specs ++ s.specs)
-                    case DuplicateSkillChoice.Switch => {
-                      choices ::= FieldChoice(s.ranks, s.skillDef);
-                      sacc.copy(specs = sacc.specs ++ s.specs)
+        case (_, sameNameSkills) =>
+          if (sameNameSkills.head.field.isDefined) {
+            val fieldGrouped = sameNameSkills.groupBy(_.field.get);
+            val noduplicates = fieldGrouped.foldLeft(List.empty[Skill]) { (fieldAcc, fieldE) =>
+              fieldE match {
+                case (_, fieldSkill :: Nil) => fieldSkill :: fieldAcc
+                case (_, sameFieldSkills) => {
+                  val head :: rest = sameFieldSkills;
+                  val fieldSkill = rest.foldLeft(head) { (sacc, s) =>
+                    combineOrSwitch.randomElement(rand).get match {
+                      case DuplicateSkillChoice.Combine =>
+                        sacc.copy(ranks = sacc.ranks + s.ranks, specs = sacc.specs ++ s.specs)
+                      case DuplicateSkillChoice.Switch => {
+                        choices ::= FieldChoice(s.ranks, s.skillDef);
+                        sacc.copy(specs = sacc.specs ++ s.specs)
+                      }
+                      case DuplicateSkillChoice.SwitchAny => {
+                        choices ::= SkillChoice(s.ranks, None);
+                        sacc.copy(specs = sacc.specs ++ s.specs)
+                      }
                     }
-                    case DuplicateSkillChoice.SwitchAny => {
-                      choices ::= SkillChoice(s.ranks, None);
-                      sacc.copy(specs = sacc.specs ++ s.specs)
-                    }
-                  }
-                };
-                fieldSkill :: fieldAcc
+                  };
+                  fieldSkill :: fieldAcc
+                }
               }
-            }
-          };
-          noduplicates ::: acc
-        } else {
-          val head :: rest = sameNameSkills;
-          val skill = rest.foldLeft(head){ (sacc, s) =>
-            combineOrSwitch.randomElement(rand).get match {
-              case DuplicateSkillChoice.Combine => sacc.copy(ranks = sacc.ranks + s.ranks, specs = sacc.specs ++ s.specs)
-              case DuplicateSkillChoice.Switch => {
-                choices ::= SkillChoice(s.ranks, Some(s.skillDef.category));
-                sacc.copy(specs = sacc.specs ++ s.specs)
+            };
+            noduplicates ::: acc
+          } else {
+            val head :: rest = sameNameSkills;
+            val skill = rest.foldLeft(head) { (sacc, s) =>
+              combineOrSwitch.randomElement(rand).get match {
+                case DuplicateSkillChoice.Combine =>
+                  sacc.copy(ranks = sacc.ranks + s.ranks, specs = sacc.specs ++ s.specs)
+                case DuplicateSkillChoice.Switch => {
+                  choices ::= SkillChoice(s.ranks, Some(s.skillDef.category));
+                  sacc.copy(specs = sacc.specs ++ s.specs)
+                }
+                case DuplicateSkillChoice.SwitchAny => {
+                  choices ::= SkillChoice(s.ranks, None);
+                  sacc.copy(specs = sacc.specs ++ s.specs)
+                }
               }
-              case DuplicateSkillChoice.SwitchAny => {
-                choices ::= SkillChoice(s.ranks, None);
-                sacc.copy(specs = sacc.specs ++ s.specs)
-              }
-            }
-          };
-          skill :: acc
-        }
+            };
+            skill :: acc
+          }
       }
     };
     (noduplicates, choices)
@@ -332,12 +349,15 @@ object CombineEverything {
 
   private def fixRep(rand: Random, rep: Map[RepNetwork, Int]): Map[RepNetwork, Int] = {
     var assignable = 0;
-    val reduced = rep.mapValues(v => if (v > 80) {
-      assignable += v - 80;
-      80
-    } else {
-      v
-    });
+    val reduced = rep.mapValues(
+      v =>
+        if (v > 80) {
+          assignable += v - 80;
+          80
+        } else {
+          v
+        }
+    );
     var assigned = reduced;
     val pickPoints = () => {
       if (assignable > 30) {
@@ -392,11 +412,13 @@ object CombineEverything {
   }
 
   private def pickMotivations(rand: Random, motivations: List[Motivation]): List[Motivation] = {
-    val noduplicates = motivations.groupBy(_.descr).map {
-      case (_, Nil)          => ??? // how the?
-      case (_, entry :: Nil) => entry
-      case (_, entries) => {
-        val choice = rand.nextInt(entries.size);
+    val noduplicates = motivations
+      .groupBy(_.descr)
+      .map {
+        case (_, Nil)          => ??? // how the?
+        case (_, entry :: Nil) => entry
+        case (_, entries) => {
+          val choice = rand.nextInt(entries.size);
         entries(choice)
       }
     } toList;
@@ -469,7 +491,8 @@ object CombineEverything {
       //println(s"Investing into rep remaining=$remainingCP, in-rep=$cpInRep, rep: $rep");
       rep.find(t => t._2 < 0) match {
         case Some((net, r)) => {
-          val amount = Math.min(Math.min(Math.ceil(Math.abs(r).toDouble / 10.0).toInt * 10, remainingCP * 10), ((35.0 - cpInRep) * 10).toInt);
+          val amount = Math.min(Math.min(Math.ceil(Math.abs(r).toDouble / 10.0).toInt * 10, remainingCP * 10),
+                                ((35.0 - cpInRep) * 10).toInt);
           remainingCP -= amount / 10;
           rep += (net -> (r + amount));
           cpInRep += amount / 10;
@@ -492,7 +515,8 @@ object CombineEverything {
               notLimited.foreach {
                 case (net, cur) => {
                   val left = 80 - cur;
-                  val amount = Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt)));
+                  val amount =
+                    Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt)));
                   remainingCP -= amount / 10;
                   rep += (net -> (cur + amount));
                   cpInRep += amount / 10;
@@ -511,7 +535,8 @@ object CombineEverything {
                 val pick = rand.nextInt(notLimited.size);
                 val (net, cur) = notLimited.toList(pick);
                 val left = 80 - cur;
-                val amount = Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt)));
+                val amount =
+                  Math.min(left, Math.min(20, Math.min(remainingCP * 10, ((cpToSpendOnRep - cpInRep) * 10).toInt)));
                 remainingCP -= amount / 10;
                 rep += (net -> (cur + amount));
                 cpInRep += amount / 10;

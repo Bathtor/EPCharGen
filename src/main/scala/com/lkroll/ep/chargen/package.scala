@@ -1,6 +1,6 @@
 package com.lkroll.ep
 
-import probability_monad.{ Distribution, Distributions }
+import probability_monad.{Distribution, Distributions}
 
 import scala.language.implicitConversions
 

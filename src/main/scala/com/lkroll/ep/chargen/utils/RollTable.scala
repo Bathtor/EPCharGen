@@ -48,7 +48,7 @@ case class RollSubTables[V](tables: RollTable[RollTableLike[V]]) extends RollTab
     }
   }
   override def entries: Iterable[V] = {
-    tables.entries.foldLeft(List.empty[V]){ (acc, t) =>
+    tables.entries.foldLeft(List.empty[V]) { (acc, t) =>
       t.entries.toList ::: acc
     }
   }

@@ -1,9 +1,9 @@
 package com.lkroll.ep.chargen.lifepath
 
 import com.lkroll.ep.chargen._
-import com.lkroll.ep.chargen.character.{ CharImplicits, Skill, Skills }
-import com.lkroll.ep.compendium.{ Aptitude, Language }
-import com.lkroll.ep.compendium.data.{ DefaultSkills, Languages }
+import com.lkroll.ep.chargen.character.{CharImplicits, Skill, Skills}
+import com.lkroll.ep.compendium.{Aptitude, Language}
+import com.lkroll.ep.compendium.data.{DefaultSkills, Languages}
 
 object LanguageTable extends Table with Pickable {
   import Languages._;
@@ -38,7 +38,8 @@ object LanguageTable extends Table with Pickable {
     (90 to 92) -> Urdu,
     (93 to 94) -> Vietnamese,
     (95 to 98) -> Wu,
-    (99 to 100) -> Language.Other);
+    (99 to 100) -> Language.Other
+  );
 
   private val uncommonData = utils.RollTable(
     (1 to 5) -> Afrikaans,
@@ -64,7 +65,8 @@ object LanguageTable extends Table with Pickable {
     (91 to 95) -> Zulu,
     (96 to 97) -> Danish,
     (98 to 98) -> Icelandic,
-    (99 to 100) -> Norwegian);
+    (99 to 100) -> Norwegian
+  );
 
   override def label: String = "Random Langauge";
   override def source: String = "Transhuman p.43";

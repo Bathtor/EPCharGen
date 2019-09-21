@@ -1,10 +1,10 @@
 package com.lkroll.ep.chargen.archetype
 
 import com.lkroll.ep.chargen._
-import com.lkroll.ep.chargen.character.{ CharImplicits, Skills, MorphInstantiation, RepNetworks, GenderTables }
+import com.lkroll.ep.chargen.character.{CharImplicits, GenderTables, MorphInstantiation, RepNetworks, Skills}
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ Aptitudes, GenderIdentity, MorphModel, MorphInstance, RepNetwork }
+import com.lkroll.ep.compendium.{Aptitudes, GenderIdentity, MorphInstance, MorphModel, RepNetwork}
 import com.lkroll.ep.compendium.data.DefaultSkills
 import com.lkroll.common.macros.Macros
 
@@ -27,14 +27,14 @@ object Archetype {
   };
 }
 
-class ArchetypeCreation(
-  val archetype:  Archetype,
-  val fair:       Boolean            = true,
-  val firewall:   FirewallOption     = FirewallOption.Skip,
-  val gear:       Boolean            = false,
-  val moxie:      Boolean            = true,
-  val origin:     Option[Origin]     = None,
-  val allegiance: Option[Allegiance] = None) extends CreationSystem {
+class ArchetypeCreation(val archetype: Archetype,
+                        val fair: Boolean = true,
+                        val firewall: FirewallOption = FirewallOption.Skip,
+                        val gear: Boolean = false,
+                        val moxie: Boolean = true,
+                        val origin: Option[Origin] = None,
+                        val allegiance: Option[Allegiance] = None)
+    extends CreationSystem {
 
   import Implicits.RandomArray;
   import CharImplicits.skilldef2skill;
@@ -82,7 +82,8 @@ class ArchetypeCreation(
       }
     };
 
-    var currentMorph: MorphInstance = MorphInstantiation.birthMorph(startingMorph, genderId, startingAge.age).roll(rand);
+    var currentMorph
+        : MorphInstance = MorphInstantiation.birthMorph(startingMorph, genderId, startingAge.age).roll(rand);
 
     history ::= s"Born/Created ${yearOfBirth} in a ${currentMorph.visibleGender.getOrElse("")} ${currentMorph.model}.";
     history ::= s"Brought up ${nativeLang.field.getOrElse("not")} speaking.";
@@ -90,12 +91,14 @@ class ArchetypeCreation(
     var char = character.CharGenCharacter(
       name = "Anonymous",
       gender = genderId,
-      aptitudes = Aptitudes(base = apts.aptitudes, morphBoni = currentMorph.aptitudeBonus, morphMax = currentMorph.aptitudeMax),
+      aptitudes =
+        Aptitudes(base = apts.aptitudes, morphBoni = currentMorph.aptitudeBonus, morphMax = currentMorph.aptitudeMax),
       skills = skills,
       background = background,
       startingMorph = startingMorph,
       activeMorph = currentMorph,
-      history = history.reverse);
+      history = history.reverse
+    );
 
     char = startingAge.mods.foldLeft(char.copy(age = startingAge.age)) { (acc, mod) =>
       mod.applyTo(acc)
@@ -112,7 +115,11 @@ class ArchetypeCreation(
 
     val focusResult = new FocusTable(archetype, ppDistribution.focus).roll(rand);
     stages ::= Stages.FocusTable(focusResult);
-    history ::= s"Learned the skills of ${if (focusResult.label.matches("""[aeiouAEIOU].*""")) { "an" } else { "a" }} ${focusResult.label}";
+    history ::= s"Learned the skills of ${if (focusResult.label.matches("""[aeiouAEIOU].*""")) {
+      "an"
+    } else {
+      "a"
+    }} ${focusResult.label}";
     char = focusResult.pkg.applyTo(char, rand);
     allPackages ::= focusResult.pkg;
 
@@ -136,13 +143,15 @@ class ArchetypeCreation(
           extraPackages ::= extraPackage;
           char = extraPackage.pkg.applyTo(char, rand);
           allPackages ::= extraPackage.pkg;
+          picked = true;
         }
       }
     }
     stages ::= Stages.FinalPackages(extraPackages, allPackages.map(_.ppCost).sum);
 
     val hasIRep = char.rep.getOrElse(RepNetworks.iRep, 0) > 0;
-    val hasNetFirewall = char.skills.find(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall").isDefined;
+    val hasNetFirewall =
+      char.skills.find(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall").isDefined;
     firewall match {
       case FirewallOption.Allow => {
         if (hasIRep || hasNetFirewall) {
@@ -167,9 +176,11 @@ class ArchetypeCreation(
           char = char.copy(rep = newRep)
         }
         if (hasNetFirewall) {
-          val (netFire, rest) = char.skills.partition(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall");
+          val (netFire, rest) =
+            char.skills.partition(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall");
           val ranks = netFire.map(_.ranks).sum;
-          val picked = DefaultSkills.networking.sampleFields.get.toArray.filterNot(_ == "Firewall").randomElement(rand).get;
+          val picked =
+            DefaultSkills.networking.sampleFields.get.toArray.filterNot(_ == "Firewall").randomElement(rand).get;
           val skill = DefaultSkills.networking.withField(picked).instance(ranks);
           char = char.copy(skills = skill :: rest);
         }
@@ -297,7 +308,7 @@ object Stages {
   }
 
   case class Gear(result: Either[(Int, Equipment), Int]) extends StageResult {
-    import EquipmentSelection.{ ArmourExt, WeaponExt };
+    import EquipmentSelection.{ArmourExt, WeaponExt};
 
     def render(renderer: Renderer): Unit = {
       renderer.stage("Step 13: Gear");

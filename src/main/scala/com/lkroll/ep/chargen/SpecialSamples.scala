@@ -1,6 +1,6 @@
 package com.lkroll.ep.chargen
 
-import probability_monad.{ Distribution, Distributions }
+import probability_monad.{Distribution, Distributions}
 
 class SpecialSamples(rand: Random) {
 

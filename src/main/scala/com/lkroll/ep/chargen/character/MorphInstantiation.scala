@@ -7,15 +7,13 @@ import com.lkroll.ep.compendium.data._
 
 import com.typesafe.scalalogging.StrictLogging
 
-import scala.util.{ Try, Success, Failure }
+import scala.util.{Failure, Success, Try}
 
-import Implicits.{ RandomArray, int2opt, str2opt };
+import Implicits.{RandomArray, int2opt, str2opt};
 
-class MorphInstantiation(
-  val model:      MorphModel,
-  val genderId:   GenderIdentity,
-  val birthMorph: Boolean,
-  val age:        Int) extends Table with StrictLogging {
+class MorphInstantiation(val model: MorphModel, val genderId: GenderIdentity, val birthMorph: Boolean, val age: Int)
+    extends Table
+    with StrictLogging {
   import MorphInstantiation._;
   import Implicits.constToRollTable;
 
@@ -23,28 +21,25 @@ class MorphInstantiation(
 
   val ageData: RollTableLike[Option[Int]] = if (!birthMorph) {
     model.name match {
-      case MorphsDF.flat.name | MorphsS.splicer.name => RollTable(
-        (1 to 25) -> 30,
-        (26 to 50) -> 40,
-        (51 to 60) -> 10,
-        (61 to 70) -> 20,
-        (71 to 75) -> 50,
-        (81 to 85) -> 60,
-        (86 to 90) -> 70,
-        (91 to 94) -> 80,
-        (95 to 97) -> 90,
-        (98 to 99) -> 100,
-        (100 to 100) -> 110)
+      case MorphsDF.flat.name | MorphsS.splicer.name =>
+        RollTable((1 to 25) -> 30,
+                  (26 to 50) -> 40,
+                  (51 to 60) -> 10,
+                  (61 to 70) -> 20,
+                  (71 to 75) -> 50,
+                  (81 to 85) -> 60,
+                  (86 to 90) -> 70,
+                  (91 to 94) -> 80,
+                  (95 to 97) -> 90,
+                  (98 to 99) -> 100,
+                  (100 to 100) -> 110)
       case MorphsMN.neotenic.name => RollConstant(10)
       case _ => {
         model.morphType match {
           case MorphType.Infomorph  => RollConstant(None)
           case MorphType.Synthmorph => RollConstant(None)
-          case MorphType.Biomorph | MorphType.Pod => RollTable(
-            (1 to 5) -> 10,
-            (6 to 80) -> 20,
-            (81 to 95) -> 30,
-            (96 to 100) -> 40)
+          case MorphType.Biomorph | MorphType.Pod =>
+            RollTable((1 to 5) -> 10, (6 to 80) -> 20, (81 to 95) -> 30, (96 to 100) -> 40)
         }
       }
     }
@@ -56,108 +51,120 @@ class MorphInstantiation(
   lazy val genderData: RollTableLike[String] = {
     val table: RollTableLike[String] = model.name match {
       case MorphsDF.fury.name => RollConstant("Female")
-      case MorphsOR.pleasurePod.name => RollSubTables(RollTable(
-        (1 to 50) -> RollConstant(genderId.toString()),
-        (51 to 100) -> RollTable(
-          (1 to 25) -> "Male",
-          (26 to 50) -> "Female",
-          (51 to 75) -> "Androgynous",
-          (76 to 100) -> "Intersex")))
+      case MorphsOR.pleasurePod.name =>
+        RollSubTables(
+          RollTable((1 to 50) -> RollConstant(genderId.toString()),
+                    (51 to 100) -> RollTable((1 to 25) -> "Male",
+                                             (26 to 50) -> "Female",
+                                             (51 to 75) -> "Androgynous",
+                                             (76 to 100) -> "Intersex"))
+        )
       case _ => {
         model.morphType match {
-          case MorphType.Infomorph => RollTable(
-            (1 to 80) -> genderId.toString,
-            (81 to 100) -> "Genderless")
-          case MorphType.Synthmorph => RollTable(
-            (1 to 80) -> "Genderless",
-            (81 to 90) -> "Male",
-            (91 to 99) -> "Female",
-            (100 to 100) -> "Intersex")
-          case MorphType.Biomorph | MorphType.Pod => RollSubTables(RollTable(
-            (1 to 50) -> RollConstant(genderId.toString()),
-            (51 to 100) -> RollTable(
-              (1 to 40) -> "Male",
-              (41 to 80) -> "Female",
-              (81 to 90) -> "Androgynous",
-              (91 to 100) -> "Intersex")))
+          case MorphType.Infomorph => RollTable((1 to 80) -> genderId.toString, (81 to 100) -> "Genderless")
+          case MorphType.Synthmorph =>
+            RollTable((1 to 80) -> "Genderless",
+                      (81 to 90) -> "Male",
+                      (91 to 99) -> "Female",
+                      (100 to 100) -> "Intersex")
+          case MorphType.Biomorph | MorphType.Pod =>
+            RollSubTables(
+              RollTable((1 to 50) -> RollConstant(genderId.toString()),
+                        (51 to 100) -> RollTable((1 to 40) -> "Male",
+                                                 (41 to 80) -> "Female",
+                                                 (81 to 90) -> "Androgynous",
+                                                 (91 to 100) -> "Intersex"))
+            )
         }
       }
     };
     if (birthMorph) {
-      RollSubTables(RollTable(
-        (1 to 199) -> genderId.toString(),
-        (200 to 200) -> table))
+      RollSubTables(RollTable((1 to 199) -> genderId.toString(), (200 to 200) -> table))
     } else {
       table
     }
   }
 
   lazy val dataEyes: RollTableLike[String] = model.morphType match {
-    case MorphType.Infomorph => RollSubTables(RollTable(
-      (1 to 80) -> eyeColourData,
-      (81 to 100) -> RollConstant("no visible")))
-    case MorphType.Synthmorph => RollSubTables(RollTable(
-      (1 to 30) -> eyeColourData,
-      (31 to 80) -> RollConstant("camera lense"),
-      (81 to 100) -> RollConstant("no visible")))
-    case MorphType.Biomorph | MorphType.Pod => RollSubTables(RollTable(
-      (1 to 90) -> eyeColourData,
-      (91 to 100) -> RollConstant("cybernetic")))
+    case MorphType.Infomorph =>
+      RollSubTables(RollTable((1 to 80) -> eyeColourData, (81 to 100) -> RollConstant("no visible")))
+    case MorphType.Synthmorph =>
+      RollSubTables(
+        RollTable((1 to 30) -> eyeColourData,
+                  (31 to 80) -> RollConstant("camera lense"),
+                  (81 to 100) -> RollConstant("no visible"))
+      )
+    case MorphType.Biomorph | MorphType.Pod =>
+      RollSubTables(RollTable((1 to 90) -> eyeColourData, (91 to 100) -> RollConstant("cybernetic")))
   };
 
   lazy val dataHair: RollTableLike[Option[String]] = model.morphType match {
-    case MorphType.Infomorph => RollTable(
-      (1 to 30) -> None,
-      (31 to 50) -> "short",
-      (51 to 60) -> "medium length",
-      (61 to 70) -> "long",
-      (71 to 80) -> "afro",
-      (81 to 85) -> "braided (dreads)",
-      (86 to 90) -> "braided (cornrows)",
-      (91 to 95) -> "mohawk",
-      (96 to 100) -> "animated")
-    case MorphType.Synthmorph => RollTable(
-      (1 to 90) -> None,
-      (91 to 91) -> "short",
-      (92 to 92) -> "medium length",
-      (93 to 93) -> "long",
-      (94 to 94) -> "afro",
-      (95 to 95) -> "braided (dreads)",
-      (96 to 96) -> "braided (cornrows)",
-      (97 to 97) -> "mohawk",
-      (98 to 100) -> "tentacles")
-    case MorphType.Biomorph | MorphType.Pod => RollTable(
-      (1 to 10) -> None,
-      (11 to 20) -> "balding",
-      (21 to 50) -> "short",
-      (51 to 60) -> "medium length",
-      (61 to 70) -> "long",
-      (71 to 80) -> "afro",
-      (81 to 85) -> "braided (dreads)",
-      (86 to 90) -> "braided (cornrows)",
-      (91 to 95) -> "mohawk",
-      (96 to 100) -> "covered")
+    case MorphType.Infomorph =>
+      RollTable(
+        (1 to 30) -> None,
+        (31 to 50) -> "short",
+        (51 to 60) -> "medium length",
+        (61 to 70) -> "long",
+        (71 to 80) -> "afro",
+        (81 to 85) -> "braided (dreads)",
+        (86 to 90) -> "braided (cornrows)",
+        (91 to 95) -> "mohawk",
+        (96 to 100) -> "animated"
+      )
+    case MorphType.Synthmorph =>
+      RollTable(
+        (1 to 90) -> None,
+        (91 to 91) -> "short",
+        (92 to 92) -> "medium length",
+        (93 to 93) -> "long",
+        (94 to 94) -> "afro",
+        (95 to 95) -> "braided (dreads)",
+        (96 to 96) -> "braided (cornrows)",
+        (97 to 97) -> "mohawk",
+        (98 to 100) -> "tentacles"
+      )
+    case MorphType.Biomorph | MorphType.Pod =>
+      RollTable(
+        (1 to 10) -> None,
+        (11 to 20) -> "balding",
+        (21 to 50) -> "short",
+        (51 to 60) -> "medium length",
+        (61 to 70) -> "long",
+        (71 to 80) -> "afro",
+        (81 to 85) -> "braided (dreads)",
+        (86 to 90) -> "braided (cornrows)",
+        (91 to 95) -> "mohawk",
+        (96 to 100) -> "covered"
+      )
   };
 
   lazy val dataSkin: RollTableLike[String] = model.morphType match {
-    case MorphType.Infomorph => RollSubTables(RollTable(
-      (1 to 30) -> RollConstant("translucent surface"),
-      (31 to 90) -> skinColourData.map(c => s"$c skin"),
-      (96 to 100) -> RollConstant("animated surface")))
-    case MorphType.Synthmorph => RollTable(
-      (1 to 60) -> "plain steel shell",
-      (61 to 70) -> "steel shell with chrome highlights",
-      (71 to 80) -> "full chrome shell",
-      (81 to 85) -> "ornate golden shell",
-      (86 to 90) -> "ornate bronze shell",
-      (91 to 95) -> "rugged titanium shell",
-      (96 to 100) -> "ornate platinum shell")
-    case MorphType.Biomorph | MorphType.Pod => RollSubTables(RollTable(
-      (1 to 70) -> skinColourData.map(c => s"$c skin"),
-      (71 to 85) -> skinColourData.map(c => s"$c visibly tattooed skin"),
-      (86 to 90) -> skinColourData.map(c => s"$c heavily tattooed skin"),
-      (91 to 95) -> RollConstant("completely painted skin"),
-      (96 to 100) -> RollConstant("completely covered skin")))
+    case MorphType.Infomorph =>
+      RollSubTables(
+        RollTable((1 to 30) -> RollConstant("translucent surface"),
+                  (31 to 90) -> skinColourData.map(c => s"$c skin"),
+                  (96 to 100) -> RollConstant("animated surface"))
+      )
+    case MorphType.Synthmorph =>
+      RollTable(
+        (1 to 60) -> "plain steel shell",
+        (61 to 70) -> "steel shell with chrome highlights",
+        (71 to 80) -> "full chrome shell",
+        (81 to 85) -> "ornate golden shell",
+        (86 to 90) -> "ornate bronze shell",
+        (91 to 95) -> "rugged titanium shell",
+        (96 to 100) -> "ornate platinum shell"
+      )
+    case MorphType.Biomorph | MorphType.Pod =>
+      RollSubTables(
+        RollTable(
+          (1 to 70) -> skinColourData.map(c => s"$c skin"),
+          (71 to 85) -> skinColourData.map(c => s"$c visibly tattooed skin"),
+          (86 to 90) -> skinColourData.map(c => s"$c heavily tattooed skin"),
+          (91 to 95) -> RollConstant("completely painted skin"),
+          (96 to 100) -> RollConstant("completely covered skin")
+        )
+      )
   };
 
   override def label: String = "Morph Instance";
@@ -204,7 +211,8 @@ $appearance""",
       otherEffects = model.otherEffects,
       attacks = model.attacks,
       durability = model.durability,
-      armour = model.armour)
+      armour = model.armour
+    )
   }
 
   private def makeChoices(rawAptBoni: AptitudeValues, rand: Random): AptitudeValues = {
@@ -213,7 +221,8 @@ $appearance""",
         val choicesT = ChoiceParser.parseString(c);
         choicesT match {
           case Success(choices) => {
-            val pool = rawAptBoni.labelledValues.filter(_._2.getOrElse(0) == 0).map(t => Aptitude.withName(t._1)).toBuffer;
+            val pool =
+              rawAptBoni.labelledValues.filter(_._2.getOrElse(0) == 0).map(t => Aptitude.withName(t._1)).toBuffer;
             var aptBoni = rawAptBoni;
             choices.foreach { c =>
               for (_ <- 1 to c.repetition) {
@@ -240,7 +249,8 @@ $appearance""",
     }
   }
 
-  private def updateAptVByName(av: AptitudeValues, apt: String, updateValue: Int => Int): AptitudeValues = updateAptVByApt(av, Aptitude.withName(apt), updateValue);
+  private def updateAptVByName(av: AptitudeValues, apt: String, updateValue: Int => Int): AptitudeValues =
+    updateAptVByApt(av, Aptitude.withName(apt), updateValue);
   private def updateAptVByApt(av: AptitudeValues, apt: Aptitude, updateValue: Int => Int): AptitudeValues = {
     apt match {
       case Aptitude.COG => av.copy(cog = updateValue(av.cog.getOrElse(0)));
@@ -278,13 +288,18 @@ object ChoiceParser {
   private def singleChoice[_: P]: P[Choice] = P(mod ~/ "to" ~/ rep ~/ "other" ~/ apt ~/ cond.?).map {
     case (bonus, repetition, exception) => Choice(repetition, bonus, exception)
   };
-  private def cond[_: P]: P[Aptitude] = P("except" ~/ StringIn("COG", "COO", "INT", "REF", "SAV", "SOM", "WIL").!).map(s => Aptitude.withName(s));
+  private def cond[_: P]: P[Aptitude] =
+    P("except" ~/ StringIn("COG", "COO", "INT", "REF", "SAV", "SOM", "WIL").!).map(s => Aptitude.withName(s));
   private def apt[_: P]: P[Unit] = P(StringIn("aptitude", "aptitudes", "aptitude of the player’s choice"));
-  private def rep[_: P]: P[Int] = P(StringIn("one", "two", "three").!).map(s => s match {
-    case "one"   => 1
-    case "two"   => 2
-    case "three" => 3
-  });
+  private def rep[_: P]: P[Int] =
+    P(StringIn("one", "two", "three").!).map(
+      s =>
+        s match {
+          case "one"   => 1
+          case "two"   => 2
+          case "three" => 3
+        }
+    );
   private def mod[_: P]: P[Int] = P(posMod | negMod);
   private def posMod[_: P]: P[Int] = P("+" ~/ int);
   private def negMod[_: P]: P[Int] = P("-" ~/ int).map(i => -i);
@@ -293,7 +308,8 @@ object ChoiceParser {
 
 object MorphInstantiation {
 
-  def forModel(morph: MorphModel, genderIdentity: GenderIdentity): MorphInstantiation = new MorphInstantiation(morph, genderIdentity, false, -1);
+  def forModel(morph: MorphModel, genderIdentity: GenderIdentity): MorphInstantiation =
+    new MorphInstantiation(morph, genderIdentity, false, -1);
   def birthMorph(morph: MorphModel, genderIdentity: GenderIdentity, age: Int): MorphInstantiation = {
     require(age > 0);
     new MorphInstantiation(morph, genderIdentity, true, age);
@@ -309,7 +325,8 @@ object MorphInstantiation {
     (81 to 85) -> "red",
     (86 to 90) -> "violet",
     (91 to 95) -> "black",
-    (96 to 100) -> "white");
+    (96 to 100) -> "white"
+  );
 
   val hairColourData: RollTableLike[String] = RollTable(
     (1 to 20) -> "blond",
@@ -321,7 +338,9 @@ object MorphInstantiation {
     (91 to 93) -> "blue",
     (94 to 96) -> "green",
     (97 to 98) -> "purple",
-    (99 to 100) -> "pink");
+    (99 to 100) -> "pink"
+  );
 
-  val skinColourData: Array[String] = Array("pale", "fair", "white", "light brown", "olive", "brown", "dark brown", "black");
+  val skinColourData: Array[String] =
+    Array("pale", "fair", "white", "light brown", "olive", "brown", "dark brown", "black");
 }

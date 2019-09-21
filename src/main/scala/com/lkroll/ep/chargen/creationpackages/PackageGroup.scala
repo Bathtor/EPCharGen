@@ -4,8 +4,10 @@ trait PackageGroup[P <: GroupedPackage] {
   def ofLevel(level: PackageLevel): Option[P#Self];
 }
 object PackageGroup {
-  def apply[P <: GroupedPackage](label: String, basic: P, influential: P): TwoPackageGroup[P] = TwoPackageGroup(label, basic, influential);
-  def apply[P <: GroupedPackage](label: String, basic: P, influential: P, formative: P): ThreePackageGroup[P] = ThreePackageGroup(label, basic, influential, formative);
+  def apply[P <: GroupedPackage](label: String, basic: P, influential: P): TwoPackageGroup[P] =
+    TwoPackageGroup(label, basic, influential);
+  def apply[P <: GroupedPackage](label: String, basic: P, influential: P, formative: P): ThreePackageGroup[P] =
+    ThreePackageGroup(label, basic, influential, formative);
 }
 
 case class TwoPackageGroup[P <: GroupedPackage](label: String, basic: P, influential: P) extends PackageGroup[P] {
@@ -21,7 +23,8 @@ case class TwoPackageGroup[P <: GroupedPackage](label: String, basic: P, influen
   }
 }
 
-case class ThreePackageGroup[P <: GroupedPackage](label: String, basic: P, influential: P, formative: P) extends PackageGroup[P] {
+case class ThreePackageGroup[P <: GroupedPackage](label: String, basic: P, influential: P, formative: P)
+    extends PackageGroup[P] {
   def basicPackage: P#Self = basic.withPrefix(label);
   def influentialPackage: P#Self = influential.withPrefix(label);
   def formativePackage: P#Self = formative.withPrefix(label);
@@ -35,9 +38,6 @@ case class ThreePackageGroup[P <: GroupedPackage](label: String, basic: P, influ
   }
 
   def asFaction(implicit ev: P =:= BackgroundPackage): TwoPackageGroup[FactionPackage] = {
-    TwoPackageGroup(
-      label = label,
-      basic = basic.asFaction,
-      influential = influential.asFaction)
+    TwoPackageGroup(label = label, basic = basic.asFaction, influential = influential.asFaction)
   }
 }

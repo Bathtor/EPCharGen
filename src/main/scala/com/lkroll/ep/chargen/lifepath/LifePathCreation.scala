@@ -1,10 +1,10 @@
 package com.lkroll.ep.chargen.lifepath
 
 import com.lkroll.ep.chargen._
-import com.lkroll.ep.chargen.character.{ CharImplicits, Skills, MorphInstantiation, RepNetworks, GenderTables }
+import com.lkroll.ep.chargen.character.{CharImplicits, GenderTables, MorphInstantiation, RepNetworks, Skills}
 import com.lkroll.ep.chargen.creationpackages._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ Aptitudes, GenderIdentity, MorphModel, MorphInstance, RepNetwork }
+import com.lkroll.ep.compendium.{Aptitudes, GenderIdentity, MorphInstance, MorphModel, RepNetwork}
 import com.lkroll.ep.compendium.data.DefaultSkills
 
 import scala.language.postfixOps
@@ -13,11 +13,11 @@ trait PathIndex {
   def tableIndex: Int;
 }
 
-class LifePathCreation(
-  val fair:     Boolean        = true,
-  val firewall: FirewallOption = FirewallOption.Skip,
-  val gear:     Boolean        = false,
-  val moxie:    Boolean        = true) extends CreationSystem {
+class LifePathCreation(val fair: Boolean = true,
+                       val firewall: FirewallOption = FirewallOption.Skip,
+                       val gear: Boolean = false,
+                       val moxie: Boolean = true)
+    extends CreationSystem {
 
   import CharImplicits.skilldef2skill;
   import Implicits.RandomArray;
@@ -70,7 +70,8 @@ class LifePathCreation(
       StartingAgeResult(age, true)
     };
     stages ::= Stages.StartingAge(startingAge);
-    var currentMorph: MorphInstance = MorphInstantiation.birthMorph(startingMorph, genderId, startingAge.age).roll(rand);
+    var currentMorph
+        : MorphInstance = MorphInstantiation.birthMorph(startingMorph, genderId, startingAge.age).roll(rand);
     val backgroundEvent: Option[BackgroundEventResult] = if (skipFall) {
       None
     } else {
@@ -94,12 +95,14 @@ class LifePathCreation(
     var char = character.CharGenCharacter(
       name = "Anonymous",
       gender = genderId,
-      aptitudes = Aptitudes(base = apts.aptitudes, morphBoni = currentMorph.aptitudeBonus, morphMax = currentMorph.aptitudeMax),
+      aptitudes =
+        Aptitudes(base = apts.aptitudes, morphBoni = currentMorph.aptitudeBonus, morphMax = currentMorph.aptitudeMax),
       skills = skills,
       background = background,
       startingMorph = startingMorph,
       activeMorph = currentMorph,
-      history = history.reverse);
+      history = history.reverse
+    );
 
     char = startingAge.mods.foldLeft(char.copy(age = startingAge.age)) { (acc, mod) =>
       mod.applyTo(acc)
@@ -107,10 +110,11 @@ class LifePathCreation(
     char = backgroundPackages.foldLeft(char)((acc, bgp) => bgp.applyTo(acc, rand));
 
     backgroundEvent match {
-      case Some(bge) => bge.effect match {
-        case BackgroundEventEffect.CharMod(mod) => char = mod.applyTo(char)
-        case _                                  => () // already applied
-      }
+      case Some(bge) =>
+        bge.effect match {
+          case BackgroundEventEffect.CharMod(mod) => char = mod.applyTo(char)
+          case _                                  => () // already applied
+        }
       case None => () // ignore
     }
 
@@ -154,10 +158,12 @@ class LifePathCreation(
     } else {
       (None, None)
     };
-    val postFallTable = PostFallPathTable.withFallPackages(char.isAGI, char.isUplift, preFallPath, fallFocus, fallFaction)
+    val postFallTable =
+      PostFallPathTable.withFallPackages(char.isAGI, char.isUplift, preFallPath, fallFocus, fallFaction)
     val postFallPath = postFallTable.roll(rand);
     stages ::= Stages.PostFallAdultPath(postFallPath);
-    val adultPackage: PPPackage = postFallPath.adultPath.pkg.left.map(_.ofLevel(postFallPath.distribution.focus).get).merge;
+    val adultPackage: PPPackage =
+      postFallPath.adultPath.pkg.left.map(_.ofLevel(postFallPath.distribution.focus).get).merge;
     allPackages ::= adultPackage;
     char = adultPackage.applyTo(char, rand);
     val factionPackage = postFallPath.factionPath.pkg.ofLevel(postFallPath.distribution.faction).get;
@@ -199,7 +205,8 @@ class LifePathCreation(
     history ::= postFallEvent.descr;
 
     val hasIRep = char.rep.getOrElse(RepNetworks.iRep, 0) > 0;
-    val hasNetFirewall = char.skills.find(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall").isDefined;
+    val hasNetFirewall =
+      char.skills.find(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall").isDefined;
     firewall match {
       case FirewallOption.Allow => {
         if (hasIRep || hasNetFirewall) {
@@ -241,9 +248,11 @@ class LifePathCreation(
           char = char.copy(rep = newRep)
         }
         if (hasNetFirewall) {
-          val (netFire, rest) = char.skills.partition(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall");
+          val (netFire, rest) =
+            char.skills.partition(s => DefaultSkills.networking.name == s.name && s.field.get == "Firewall");
           val ranks = netFire.map(_.ranks).sum;
-          val picked = DefaultSkills.networking.sampleFields.get.toArray.filterNot(_ == "Firewall").randomElement(rand).get;
+          val picked =
+            DefaultSkills.networking.sampleFields.get.toArray.filterNot(_ == "Firewall").randomElement(rand).get;
           val skill = DefaultSkills.networking.withField(picked).instance(ranks);
           char = char.copy(skills = skill :: rest);
         }
@@ -258,14 +267,12 @@ class LifePathCreation(
     val startingCredit = StartingCreditTable.roll(rand);
     if (gear) {
       var remainingCredit = startingCredit + char.startingCredit;
-      var availablePacks = GearPackages.list.toArray.filter(p =>
-        p.usableBy(char) && (p.creditCost <= remainingCredit));
+      var availablePacks = GearPackages.list.toArray.filter(p => p.usableBy(char) && (p.creditCost <= remainingCredit));
       var gearPacks: List[GearPackage] = Nil;
       while (!availablePacks.isEmpty) {
         val pack = availablePacks.randomElement(rand).get;
         remainingCredit -= pack.creditCost;
-        availablePacks = availablePacks.filter(p =>
-          (p.label != pack.label) && (p.creditCost <= remainingCredit));
+        availablePacks = availablePacks.filter(p => (p.label != pack.label) && (p.creditCost <= remainingCredit));
         gearPacks ::= pack;
       }
       remainingCredit = Math.max(0, remainingCredit);

@@ -17,5 +17,6 @@ object RepNetworks {
 
   val list: List[RepNetwork] = Macros.memberList[RepNetwork];
 
-  def chooseAny(rand: Random, mod: Int): CharacterMod.RepMod = CharacterMod.RepMod(Right(CharacterMod.SkillChoice.PickAny(rand)), mod);
+  def chooseAny(rand: Random, mod: Int): CharacterMod.RepMod =
+    CharacterMod.RepMod(Right(CharacterMod.SkillChoice.PickAny(rand)), mod);
 }

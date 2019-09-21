@@ -8,12 +8,12 @@ case class PostFallPath(distribution: PointDistribution, adultPath: AdultPath, f
 case class FactionPath(kind: String, index: Int, label: String, pkg: TwoPackageGroup[FactionPackage])
 case class PointDistribution(kind: String, faction: PackageLevel, focus: PackageLevel)
 
-class PostFallPathTable(
-  val isAGI:        Boolean,
-  val isUplift:     Boolean,
-  val previousPath: Option[PathGroup],
-  val fallFocus:    Option[Either[ThreePackageGroup[FocusPackage], CustomizationPackage]],
-  val fallFaction:  Option[TwoPackageGroup[FactionPackage]]) extends Table {
+class PostFallPathTable(val isAGI: Boolean,
+                        val isUplift: Boolean,
+                        val previousPath: Option[PathGroup],
+                        val fallFocus: Option[Either[ThreePackageGroup[FocusPackage], CustomizationPackage]],
+                        val fallFaction: Option[TwoPackageGroup[FactionPackage]])
+    extends Table {
 
   import PostFallPathTable._;
 
@@ -27,14 +27,14 @@ class PostFallPathTable(
       case _              => data0.randomElement(rand).get
     };
     val adultPath: AdultPath = fallFocus match {
-      case Some(r @ Right(_)) => AdultPath(
-        kind = "The Fall shaped your path.",
-        path = PathGroup(12, "Customization", FactionPathIndex(-1)),
-        pkg = r)
-      case Some(Left(pkgGroup)) => AdultPath(
-        kind = "The Fall shaped your path.",
-        path = PathGroup(12, "Customization", FactionPathIndex(-1)),
-        pkg = Left(pkgGroup))
+      case Some(r @ Right(_)) =>
+        AdultPath(kind = "The Fall shaped your path.",
+                  path = PathGroup(12, "Customization", FactionPathIndex(-1)),
+                  pkg = r)
+      case Some(Left(pkgGroup)) =>
+        AdultPath(kind = "The Fall shaped your path.",
+                  path = PathGroup(12, "Customization", FactionPathIndex(-1)),
+                  pkg = Left(pkgGroup))
       case None => justFocus(rand)
     };
 
@@ -53,11 +53,12 @@ class PostFallPathTable(
     } else {
       val factionChoice = data2.randomElement(rand).get;
       val tableIndex: Int = factionChoice match {
-        case FactionChoice.Focus => adultPath.path.faction.i match {
-          case -1                         => data3.randomElement(rand).get // customization in prefall path
-          case i if (i >= 4) && (i <= 13) => i
-          case _                          => ???
-        }
+        case FactionChoice.Focus =>
+          adultPath.path.faction.i match {
+            case -1                         => data3.randomElement(rand).get // customization in prefall path
+            case i if (i >= 4) && (i <= 13) => i
+            case _                          => ???
+          }
         case FactionChoice.Switch => data3.randomElement(rand).get
       };
       factionFromIndex(rand, tableIndex, factionChoice.kind)
@@ -105,12 +106,11 @@ object PostFallPathTable {
   import Implicits.RandomArray;
   import FactionPackages._;
 
-  def withFallPackages(
-    isAGI:        Boolean,
-    isUplift:     Boolean,
-    previousPath: Option[PathGroup]                                                     = None,
-    fallFocus:    Option[Either[ThreePackageGroup[FocusPackage], CustomizationPackage]] = None,
-    fallFaction:  Option[TwoPackageGroup[FactionPackage]]                               = None): PostFallPathTable = {
+  def withFallPackages(isAGI: Boolean,
+                       isUplift: Boolean,
+                       previousPath: Option[PathGroup] = None,
+                       fallFocus: Option[Either[ThreePackageGroup[FocusPackage], CustomizationPackage]] = None,
+                       fallFaction: Option[TwoPackageGroup[FactionPackage]] = None): PostFallPathTable = {
     require(!(isAGI && isUplift), "Can't be both an AGI and an Uplift!");
     new PostFallPathTable(isAGI, isUplift, previousPath, fallFocus, fallFaction)
   }
@@ -143,159 +143,81 @@ object PostFallPathTable {
     (1 to 2) -> PointDistribution("Faction paragon", PackageLevel.Influential, PackageLevel.Basic),
     (3 to 5) -> PointDistribution("Equally balanced", PackageLevel.Influential, PackageLevel.Influential),
     (6 to 7) -> PointDistribution("Defined by your actions", PackageLevel.Basic, PackageLevel.Influential),
-    (8 to 10) -> PointDistribution("You get the job done", PackageLevel.Basic, PackageLevel.Formative));
+    (8 to 10) -> PointDistribution("You get the job done", PackageLevel.Basic, PackageLevel.Formative)
+  );
 
-  private val data1: RollTable[PathChoice] = RollTable(
-    (1 to 6) -> PathChoice.Stay,
-    (7 to 10) -> PathChoice.Switch);
+  private val data1: RollTable[PathChoice] = RollTable((1 to 6) -> PathChoice.Stay, (7 to 10) -> PathChoice.Switch);
 
-  private val data2: RollTable[FactionChoice] = RollTable(
-    (1 to 6) -> FactionChoice.Focus,
-    (7 to 10) -> FactionChoice.Switch);
+  private val data2: RollTable[FactionChoice] =
+    RollTable((1 to 6) -> FactionChoice.Focus, (7 to 10) -> FactionChoice.Switch);
 
   private val data3: RandomArray[Int] = Array(4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
 
-  private val data4: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    anarchist,
-    argonaut,
-    barsoomian,
-    brinker,
-    criminal,
-    europan,
-    extropian,
-    ringer,
-    scum,
-    titanian);
+  private val data4: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(anarchist, argonaut, barsoomian, brinker, criminal, europan, extropian, ringer, scum, titanian);
 
-  private val data5: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    belter,
-    bioconservative,
-    criminal,
-    hypercorp,
-    lunar,
-    orbital,
-    reclaimer,
-    sifter,
-    skimmer,
-    titanian);
+  private val data5: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(belter, bioconservative, criminal, hypercorp, lunar, orbital, reclaimer, sifter, skimmer, titanian);
 
-  private val data6: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    anarchist,
-    belter,
-    brinker,
-    criminal,
-    exhuman,
-    extropian,
-    lunar,
-    orbital,
-    ringer,
-    scum);
+  private val data6: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(anarchist, belter, brinker, criminal, exhuman, extropian, lunar, orbital, ringer, scum);
 
-  private val data7: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    bioconservative,
-    brinker,
-    exhuman,
-    extropian,
-    hypercorp,
-    orbital,
-    socialite,
-    precautionist,
-    ultimate,
-    venusian);
+  private val data7: RandomArray[TwoPackageGroup[FactionPackage]] = Array(bioconservative,
+                                                                          brinker,
+                                                                          exhuman,
+                                                                          extropian,
+                                                                          hypercorp,
+                                                                          orbital,
+                                                                          socialite,
+                                                                          precautionist,
+                                                                          ultimate,
+                                                                          venusian);
 
-  private val data8: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    bioconservative,
-    extropian,
-    hypercorp,
-    jovian,
-    lunar,
-    orbital,
-    socialite,
-    preservationist,
-    reclaimer,
-    venusian);
+  private val data8: RandomArray[TwoPackageGroup[FactionPackage]] = Array(bioconservative,
+                                                                          extropian,
+                                                                          hypercorp,
+                                                                          jovian,
+                                                                          lunar,
+                                                                          orbital,
+                                                                          socialite,
+                                                                          preservationist,
+                                                                          reclaimer,
+                                                                          venusian);
 
-  private val data9: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    anarchist,
-    barsoomian,
-    hypercorp,
-    lunar,
-    scum,
-    preservationist,
-    reclaimer,
-    sifter,
-    skimmer,
-    venusian);
+  private val data9: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(anarchist, barsoomian, hypercorp, lunar, scum, preservationist, reclaimer, sifter, skimmer, venusian);
 
-  private val data10: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    bioconservative,
-    brinker,
-    criminal,
-    hypercorp,
-    jovian,
-    lunar,
-    orbital,
-    reclaimer,
-    precautionist,
-    ultimate);
+  private val data10: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(bioconservative, brinker, criminal, hypercorp, jovian, lunar, orbital, reclaimer, precautionist, ultimate);
 
-  private val data11: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    argonaut,
-    europan,
-    exhuman,
-    hypercorp,
-    nanoEcologist,
-    precautionist,
-    singularitySeeker,
-    solarian,
-    titanian,
-    venusian);
+  private val data11: RandomArray[TwoPackageGroup[FactionPackage]] = Array(argonaut,
+                                                                           europan,
+                                                                           exhuman,
+                                                                           hypercorp,
+                                                                           nanoEcologist,
+                                                                           precautionist,
+                                                                           singularitySeeker,
+                                                                           solarian,
+                                                                           titanian,
+                                                                           venusian);
 
-  private val data12: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    belter,
-    brinker,
-    criminal,
-    extropian,
-    outster,
-    scum,
-    ringer,
-    singularitySeeker,
-    skimmer,
-    solarian);
+  private val data12: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(belter, brinker, criminal, extropian, outster, scum, ringer, singularitySeeker, skimmer, solarian);
 
-  private val data13: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    anarchist,
-    argonaut,
-    barsoomian,
-    extropian,
-    hypercorp,
-    nanoEcologist,
-    sifter,
-    singularitySeeker,
-    titanian,
-    venusian);
+  private val data13: RandomArray[TwoPackageGroup[FactionPackage]] = Array(anarchist,
+                                                                           argonaut,
+                                                                           barsoomian,
+                                                                           extropian,
+                                                                           hypercorp,
+                                                                           nanoEcologist,
+                                                                           sifter,
+                                                                           singularitySeeker,
+                                                                           titanian,
+                                                                           venusian);
 
-  private val data14AGI: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    anarchist,
-    argonaut,
-    brinker,
-    criminal,
-    europan,
-    hypercorp,
-    mercurialInfolife,
-    sapient,
-    solarian,
-    venusian);
-  private val data14Uplift: RandomArray[TwoPackageGroup[FactionPackage]] = Array(
-    anarchist,
-    argonaut,
-    brinker,
-    criminal,
-    europan,
-    hypercorp,
-    mercurialUplift,
-    sapient,
-    solarian,
-    venusian);
+  private val data14AGI: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(anarchist, argonaut, brinker, criminal, europan, hypercorp, mercurialInfolife, sapient, solarian, venusian);
+  private val data14Uplift: RandomArray[TwoPackageGroup[FactionPackage]] =
+    Array(anarchist, argonaut, brinker, criminal, europan, hypercorp, mercurialUplift, sapient, solarian, venusian);
 
 }

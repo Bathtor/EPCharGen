@@ -3,19 +3,19 @@ package com.lkroll.ep.chargen.names
 import akka.actor._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings }
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import akka.util._
 
-import upickle.default.{ ReadWriter => RW, _ }
+import upickle.default.{ReadWriter => RW, _}
 
 import scala.language.postfixOps
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import scala.collection.mutable
 
 import com.lkroll.ep.chargen.character.Skill
-import com.lkroll.ep.compendium.{ Language, GenderIdentity }
+import com.lkroll.ep.compendium.{GenderIdentity, Language}
 import com.lkroll.ep.compendium.data.Languages
 
 import com.typesafe.scalalogging.StrictLogging
@@ -39,10 +39,7 @@ object BehindTheName extends BehindTheNameAPI {
   val source = "https://www.behindthename.com";
 
   def genTimeout(config: Config = _instance.system.settings.config): FiniteDuration = {
-    Duration.fromNanos(
-      config.getDuration(
-        "chargen.gen-timeout",
-        java.util.concurrent.TimeUnit.NANOSECONDS));
+    Duration.fromNanos(config.getDuration("chargen.gen-timeout", java.util.concurrent.TimeUnit.NANOSECONDS));
   }
 }
 
@@ -58,14 +55,11 @@ class BehindTheName(val system: ActorSystem) extends BehindTheNameAPI with Stric
 
   val genTimeout = BehindTheName.genTimeout(system.settings.config)
 
-  private val clientT = apiKeyT.map(apiKey => system.actorOf(Props(new BehindTheNameClient(apiKey)), name = "behind-the-name-client"));
+  private val clientT =
+    apiKeyT.map(apiKey => system.actorOf(Props(new BehindTheNameClient(apiKey)), name = "behind-the-name-client"));
 
-  private val cancellableT = clientT.map{ client =>
-    system.scheduler.schedule(
-      250 milliseconds,
-      250 milliseconds,
-      client,
-      Tick)
+  private val cancellableT = clientT.map { client =>
+    system.scheduler.schedule(250 milliseconds, 250 milliseconds, client, Tick)
   };
 
   implicit val timeout = Timeout(5 seconds);
@@ -109,11 +103,11 @@ object NameResult {
 sealed trait NameRequest {
   def generateUri(apiKey: String): Uri;
 }
-case class RandomNameRequest(
-  gender:        Option[GenderCode.GenderCode]     = None,
-  usage:         List[NameUsageCode.NameUsageCode] = Nil,
-  num:           Int                               = 2,
-  randomSurname: Boolean                           = false) extends NameRequest {
+case class RandomNameRequest(gender: Option[GenderCode.GenderCode] = None,
+                             usage: List[NameUsageCode.NameUsageCode] = Nil,
+                             num: Int = 2,
+                             randomSurname: Boolean = false)
+    extends NameRequest {
   require(num > 0);
   require(num <= 6);
 
@@ -122,7 +116,8 @@ case class RandomNameRequest(
       Some("key" -> apiKey),
       gender.map(c => ("gender" -> GenderCode.toQuery(c))),
       Some("number" -> num.toString),
-      Some("randomsurname" -> (if (randomSurname) "yes" else "no"))).flatten ++
+      Some("randomsurname" -> (if (randomSurname) "yes" else "no"))
+    ).flatten ++
       usage.map(c => ("usage" -> NameUsageCode.toQuery(c)));
 
     Uri("https://www.behindthename.com/api/random.json").withQuery(Uri.Query(opts: _*))
@@ -136,7 +131,7 @@ class BehindTheNameClient(apiKey: String) extends Actor with ActorLogging {
   import akka.pattern.pipe;
   import context.dispatcher;
 
-  final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system));
+  implicit final val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system));
 
   val http = Http(context.system);
 

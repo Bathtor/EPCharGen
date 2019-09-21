@@ -52,14 +52,19 @@ object CharFilter {
 
   case class SkillOver(skillName: String, field: Option[String] = None, minTotal: Int) extends CharFilter {
     override def matches(char: CharGenCharacter): Boolean = {
-      val res: Option[Boolean] = char.skills.find(s => if (field.isDefined) {
-        s.name.contains(skillName) && s.field.isDefined && s.field.get.contains(field.get)
-      } else {
-        s.name.contains(skillName)
-      }).map{ s =>
-        val total = char.aptitudes.total.valueFor(s.apt) + s.ranks;
-        total > minTotal
-      };
+      val res: Option[Boolean] = char.skills
+        .find(
+          s =>
+            if (field.isDefined) {
+              s.name.contains(skillName) && s.field.isDefined && s.field.get.contains(field.get)
+            } else {
+              s.name.contains(skillName)
+            }
+        )
+        .map { s =>
+          val total = char.aptitudes.total.valueFor(s.apt) + s.ranks;
+          total > minTotal
+        };
       res.getOrElse(false)
     }
   }

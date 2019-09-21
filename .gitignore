@@ -41,3 +41,8 @@ etarget/
 # Special
 
 application.conf
+
+# Metals
+.bloop/
+.metals/
+.vscode/

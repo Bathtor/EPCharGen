@@ -31,7 +31,8 @@ object Disorders extends Table {
     (85 to 88) -> "Phobia",
     (89 to 94) -> "Post-Traumatic Stress Disorder",
     (95 to 97) -> "Schizophrenia",
-    (98 to 100) -> "Species Dysmorphia");
+    (98 to 100) -> "Species Dysmorphia"
+  );
 
   override def label: String = "Disorders";
   override def source: String = "Transhuman p.49";

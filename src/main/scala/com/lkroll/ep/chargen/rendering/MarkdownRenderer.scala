@@ -1,8 +1,6 @@
 package com.lkroll.ep.chargen.rendering
 
-class MarkdownRenderer(
-  val prelude: String = "",
-  val ending:  String = "") extends Renderer {
+class MarkdownRenderer(val prelude: String = "", val ending: String = "") extends Renderer {
 
   override type Output = String;
 

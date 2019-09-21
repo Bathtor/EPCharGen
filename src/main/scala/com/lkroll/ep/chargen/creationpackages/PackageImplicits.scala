@@ -23,25 +23,31 @@ object PackageImplicits {
   object Sleights {
     object PsiChi {
       def +(i: Int): PackageContent.RandMods = {
-        val f = (rand: Random) => (1 to i).map(_ => PsiChiSleights.roll(rand)).map(CharacterMod.GainPsiSleight(_)).toList;
+        val f = (rand: Random) =>
+          (1 to i).map(_ => PsiChiSleights.roll(rand)).map(CharacterMod.GainPsiSleight(_)).toList;
         PackageContent.RandMods(f)
       }
     }
     object PsiGamma {
       def +(i: Int): PackageContent.RandMods = {
-        val f = (rand: Random) => (1 to i).map(_ => PsiGammaSleights.roll(rand)).map(CharacterMod.GainPsiSleight(_)).toList;
+        val f = (rand: Random) =>
+          (1 to i).map(_ => PsiGammaSleights.roll(rand)).map(CharacterMod.GainPsiSleight(_)).toList;
         PackageContent.RandMods(f)
       }
     }
 
     def +(i: Int): PackageContent.RandMods = {
-      val f = (rand: Random) => (1 to i).map{ _ =>
-        if (rand.nextBoolean()) {
-          PsiChiSleights.roll(rand)
-        } else {
-          PsiGammaSleights.roll(rand)
-        }
-      }.map(CharacterMod.GainPsiSleight(_)).toList;
+      val f = (rand: Random) =>
+        (1 to i)
+          .map { _ =>
+            if (rand.nextBoolean()) {
+              PsiChiSleights.roll(rand)
+            } else {
+              PsiGammaSleights.roll(rand)
+            }
+          }
+          .map(CharacterMod.GainPsiSleight(_))
+          .toList;
       PackageContent.RandMods(f)
     }
   }

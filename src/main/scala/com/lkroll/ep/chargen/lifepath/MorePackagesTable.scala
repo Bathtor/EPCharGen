@@ -6,10 +6,8 @@ import com.lkroll.ep.chargen.utils._
 
 case class ExtraPackage(prefix: String, pkg: PPPackage)
 
-class MorePackagesTable(
-  val previousPath: PostFallPathTable,
-  val adultPath:    AdultPath,
-  val isAsync:      Boolean) extends Table {
+class MorePackagesTable(val previousPath: PostFallPathTable, val adultPath: AdultPath, val isAsync: Boolean)
+    extends Table {
 
   override type Result = ExtraPackage;
 
@@ -20,10 +18,9 @@ class MorePackagesTable(
     case object Customization extends PackageChoice;
   }
 
-  private val data: RollTable[PackageChoice] = RollTable(
-    (1 to 4) -> PackageChoice.Focus,
-    (5 to 6) -> PackageChoice.Faction,
-    (7 to 10) -> PackageChoice.Customization);
+  private val data: RollTable[PackageChoice] = RollTable((1 to 4) -> PackageChoice.Focus,
+                                                         (5 to 6) -> PackageChoice.Faction,
+                                                         (7 to 10) -> PackageChoice.Customization);
 
   override def label: String = "More Packages";
   override def source: String = "Transhuman p.67";

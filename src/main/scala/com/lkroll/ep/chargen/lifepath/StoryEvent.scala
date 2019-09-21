@@ -56,7 +56,8 @@ object StoryEvent extends Table with Pickable {
     (93 to 94) -> "You don’t have what it takes, and your current job/prospect ends in a washout.",
     (95 to 96) -> "Your inquisitive nature leads you to discover a secret that could get you into trouble.",
     (97 to 98) -> "You receive a wake-up call that challenges your current priorities.",
-    (99 to 100) -> "Your current job/pursuits take you somewhere dangerous.");
+    (99 to 100) -> "Your current job/pursuits take you somewhere dangerous."
+  );
 
   override def label: String = "Story Event";
   override def source: String = "Transhuman p.73";

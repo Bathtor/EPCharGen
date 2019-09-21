@@ -7,54 +7,55 @@ import com.lkroll.ep.chargen.impression.Personality
 
 import scala.language.postfixOps
 
-case class CharGenCharacter(
-  name:             String,
-  personality:      Option[Personality]                  = None,
-  gender:           GenderIdentity,
-  age:              Int                                  = -1,
-  motivations:      List[Motivation]                     = Nil,
-  faction:          String                               = "None",
-  aptitudes:        Aptitudes,
-  moxie:            Int                                  = 0,
-  skills:           List[Skill],
-  background:       String,
-  startingMorph:    MorphModel,
-  activeMorph:      MorphInstance,
-  traits:           List[EPTrait]                        = Nil,
-  history:          List[String]                         = Nil,
-  startingCredit:   Int                                  = 0,
-  rep:              Map[RepNetwork, Int]                 = Map.empty,
-  isAsync:          Boolean                              = false,
-  psiChiSleights:   List[PsiSleight]                     = Nil,
-  psiGammaSleights: List[PsiSleight]                     = Nil,
-  gear:             List[GearEntry]                      = Nil,
-  weapons:          List[Either[Weapon, WeaponWithAmmo]] = Nil,
-  armour:           List[Either[Armour, ModdedArmour]]   = Nil,
-  software:         List[Software]                       = Nil) {
+case class CharGenCharacter(name: String,
+                            personality: Option[Personality] = None,
+                            gender: GenderIdentity,
+                            age: Int = -1,
+                            motivations: List[Motivation] = Nil,
+                            faction: String = "None",
+                            aptitudes: Aptitudes,
+                            moxie: Int = 0,
+                            skills: List[Skill],
+                            background: String,
+                            startingMorph: MorphModel,
+                            activeMorph: MorphInstance,
+                            traits: List[EPTrait] = Nil,
+                            history: List[String] = Nil,
+                            startingCredit: Int = 0,
+                            rep: Map[RepNetwork, Int] = Map.empty,
+                            isAsync: Boolean = false,
+                            psiChiSleights: List[PsiSleight] = Nil,
+                            psiGammaSleights: List[PsiSleight] = Nil,
+                            gear: List[GearEntry] = Nil,
+                            weapons: List[Either[Weapon, WeaponWithAmmo]] = Nil,
+                            armour: List[Either[Armour, ModdedArmour]] = Nil,
+                            software: List[Software] = Nil) {
 
-  def toCompendium(): EPCharacter = EPCharacter(
-    name = name,
-    gender = gender,
-    age = age,
-    motivations = motivations,
-    faction = faction,
-    aptitudes = aptitudes,
-    moxie = moxie,
-    skills = skills.map(_.toCompendium()),
-    background = background,
-    startingMorph = startingMorph,
-    activeMorph = activeMorph,
-    traits = traits,
-    history = history,
-    startingCredit = startingCredit,
-    rep = rep,
-    isAsync = isAsync,
-    psiChiSleights = psiChiSleights,
-    psiGammaSleights = psiGammaSleights,
-    gear = gear,
-    weapons = weapons,
-    armour = armour,
-    software = software);
+  def toCompendium(): EPCharacter =
+    EPCharacter(
+      name = name,
+      gender = gender,
+      age = age,
+      motivations = motivations,
+      faction = faction,
+      aptitudes = aptitudes,
+      moxie = moxie,
+      skills = skills.map(_.toCompendium()),
+      background = background,
+      startingMorph = startingMorph,
+      activeMorph = activeMorph,
+      traits = traits,
+      history = history,
+      startingCredit = startingCredit,
+      rep = rep,
+      isAsync = isAsync,
+      psiChiSleights = psiChiSleights,
+      psiGammaSleights = psiGammaSleights,
+      gear = gear,
+      weapons = weapons,
+      armour = armour,
+      software = software
+    );
 
   lazy val appearance: String = {
     val descr = {
@@ -71,7 +72,7 @@ case class CharGenCharacter(
   def render(renderer: Renderer): Unit = {
     renderer.value(appearance);
     renderer.newline();
-    personality.foreach{ p =>
+    personality.foreach { p =>
       renderer.value(p.render);
       renderer.newline();
     }
@@ -135,7 +136,7 @@ case class CharGenCharacter(
     renderer.section("Gear");
     val allGear = List(
       gear.map(g => s"${g.item.templateTitle} (${g.count})"),
-      armour.map{
+      armour.map {
         case Left(a)   => a.templateTitle
         case Right(am) => am.templateTitle
       },
@@ -143,7 +144,8 @@ case class CharGenCharacter(
         case Left(w)   => w.templateTitle
         case Right(wa) => wa.templateTitle
       },
-      software.map(_.templateTitle));
+      software.map(_.templateTitle)
+    );
     renderer.list(allGear.flatten.sorted);
   }
 

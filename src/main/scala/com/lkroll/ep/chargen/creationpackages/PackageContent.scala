@@ -38,7 +38,8 @@ object PackageContent {
           case Left(None) =>
             require(skillTemplate.field.isEmpty, "Skill requires field, but none was given."); ???
           case Right(SkillChoice.PickAny) => {
-            val fieldName = skillTemplate.sampleFields.flatMap(samples => samples.randomElement(rand)).getOrElse("Choose One");
+            val fieldName =
+              skillTemplate.sampleFields.flatMap(samples => samples.randomElement(rand)).getOrElse("Choose One");
             skillTemplate.withField(fieldName).instance(ranks)
           }
           case Right(SkillChoice.OneOf(fields)) => {
@@ -88,8 +89,10 @@ object PackageContent {
     case class OneOf(options: List[String]) extends SkillChoice {
       require(options.nonEmpty, "Empty OneOf doesn't make any sense!");
       def at(ranks: Int): Skill = Skill(Right(this), Right(PickAny), ranks);
-      def +(mod: Int): CharacterMod.SkillMod = CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.OneOf(options)), Left(None), mod);
-      def -(mod: Int): CharacterMod.SkillMod = CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.OneOf(options)), Left(None), -mod);
+      def +(mod: Int): CharacterMod.SkillMod =
+        CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.OneOf(options)), Left(None), mod);
+      def -(mod: Int): CharacterMod.SkillMod =
+        CharacterMod.SkillMod(Right(CharacterMod.SkillChoice.OneOf(options)), Left(None), -mod);
     }
     case class PickOnly(filters: List[SkillFilter]) extends SkillChoice;
   }

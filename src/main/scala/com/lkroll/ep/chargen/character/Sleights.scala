@@ -3,11 +3,9 @@ package com.lkroll.ep.chargen.character
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.utils._
 import com.lkroll.ep.compendium._
-import com.lkroll.ep.compendium.data.{ PsiChiSleights => PsiChiData, PsiGammaSleights => PsiGammaData }
+import com.lkroll.ep.compendium.data.{PsiChiSleights => PsiChiData, PsiGammaSleights => PsiGammaData}
 
-object Sleights {
-
-}
+object Sleights {}
 
 object PsiChiSleights extends Table {
   import PsiChiData._;
@@ -35,7 +33,8 @@ object PsiChiSleights extends Table {
     (81 to 85) -> superiorKinesics,
     (86 to 90) -> timeSense,
     (91 to 95) -> unconsciousLead,
-    (96 to 100) -> xenoEmpathy);
+    (96 to 100) -> xenoEmpathy
+  );
 
   override def label: String = "Psi-Chi Sleights";
   override def source: String = "Transhuman p. 45";
@@ -72,7 +71,8 @@ object PsiGammaSleights extends Table {
     (83 to 86) -> spam,
     (87 to 90) -> static,
     (91 to 95) -> subliminal,
-    (96 to 100) -> thoughtBrowse);
+    (96 to 100) -> thoughtBrowse
+  );
 
   override def label: String = "Psi-Gamma Sleights";
   override def source: String = "Transhuman p. 45";

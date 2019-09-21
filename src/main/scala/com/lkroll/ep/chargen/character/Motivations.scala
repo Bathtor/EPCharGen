@@ -2,16 +2,19 @@ package com.lkroll.ep.chargen.character
 
 import com.lkroll.ep.chargen._
 import com.lkroll.ep.chargen.utils._
-import com.lkroll.ep.compendium.{ Motivation, MotivationKind }
+import com.lkroll.ep.compendium.{Motivation, MotivationKind}
 import com.typesafe.scalalogging.StrictLogging
 
 object MotivationParser extends StrictLogging {
   import fastparse._;
   import NoWhitespace._
 
-  def motParser[_: P]: P[Motivation] = P(kindParser ~/ ws.rep ~ nameParser).map{ case (kind, s) => Motivation(kind, s) };
+  def motParser[_: P]: P[Motivation] = P(kindParser ~/ ws.rep ~ nameParser).map {
+    case (kind, s) => Motivation(kind, s)
+  };
   def kindParser[_: P]: P[MotivationKind] = P(eitherParser | likeParser | dislikeParser);
-  def eitherParser[_: P]: P[MotivationKind] = P(("+" ~ "/" ~/ ("-" | "–")) | (("-" | "–") ~ "/" ~/ "+")).map(_ => MotivationKind.Either);
+  def eitherParser[_: P]: P[MotivationKind] =
+    P(("+" ~ "/" ~/ ("-" | "–")) | (("-" | "–") ~ "/" ~/ "+")).map(_ => MotivationKind.Either);
   def likeParser[_: P]: P[MotivationKind] = P("+").map(_ => MotivationKind.Like);
   def dislikeParser[_: P]: P[MotivationKind] = P("-" | "–").map(_ => MotivationKind.Dislike);
   def nameParser[_: P]: P[String] = P(AnyChar.rep.!);
@@ -33,9 +36,8 @@ object Motivations extends Table {
 
   override type Result = Motivation;
 
-  val dataKind: RollTable[MotivationKind] = RollTable(
-    (1 to 8) -> MotivationKind.Like,
-    (9 to 10) -> MotivationKind.Dislike);
+  val dataKind: RollTable[MotivationKind] =
+    RollTable((1 to 8) -> MotivationKind.Like, (9 to 10) -> MotivationKind.Dislike);
 
   val data: RandomArray[String] = Array(
     "Acceptance/Assimilation",
@@ -96,7 +98,8 @@ object Motivations extends Table {
     "Preservationism",
     "Reclaiming Earth",
     "Religion",
-    "Research");
+    "Research"
+  );
 
   override def label: String = "Motivations";
   override def source: String = "Transhuman p.41";
