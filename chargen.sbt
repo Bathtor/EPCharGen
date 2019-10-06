@@ -4,9 +4,9 @@ name := "EP Character Generator"
 
 organization := "com.lkroll.ep"
 
-version := "1.3.3-SNAPSHOT"
+version := "1.3.3"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.10"
 
 scalacOptions += "-Xfatal-warnings"
 scalacOptions += "-feature"
@@ -14,7 +14,7 @@ scalacOptions += "-feature"
 resolvers += Resolver.bintrayRepo("lkrollcom", "maven")
 
 val akkaV = "2.5.17"
-val epcompendiumV = "6.0.0-SNAPSHOT"
+val epcompendiumV = "6.0.0"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % akkaV
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % akkaV
