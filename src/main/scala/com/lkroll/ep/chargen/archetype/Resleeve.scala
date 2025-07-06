@@ -72,14 +72,20 @@ class ResleeveTable(val archetype: Archetype,
     val fallDeathProb: Int = if (age < 10) {
       0
     } else {
-      archetype match {
-        case Archetype.Butterfly if earthBorn                     => 96
-        case Archetype.Butterfly if !earthBorn                    => 30
-        case Archetype.Fighter if earthBorn                       => 99
-        case Archetype.Fighter if !earthBorn                      => 70
-        case Archetype.Hacker | Archetype.Scientist if earthBorn  => 98
-        case Archetype.Hacker | Archetype.Scientist if !earthBorn => 40
+      if (earthBorn) {
+        archetype match {
+          case Archetype.Butterfly                    => 96
+          case Archetype.Fighter                      => 99
+          case Archetype.Hacker | Archetype.Scientist => 98
+        }
+      } else {
+        archetype match {
+          case Archetype.Butterfly                    => 30
+          case Archetype.Fighter                      => 70
+          case Archetype.Hacker | Archetype.Scientist => 40
+        }
       }
+
     };
     val postFallDeathProb: Int = archetype match {
       case Archetype.Butterfly                    => 10

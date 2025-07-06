@@ -6,7 +6,7 @@ trait CharFilter {
   def matches(char: CharGenCharacter): Boolean;
 
   def untilMatch(f: => CreationResult): CreationResult = {
-    val ff = f _;
+    val ff = () => f;
     while (true) {
       val cres = ff();
       if (matches(cres.character)) {

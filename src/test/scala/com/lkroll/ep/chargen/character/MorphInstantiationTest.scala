@@ -1,10 +1,11 @@
 package com.lkroll.ep.chargen.character
 
-import org.scalatest._
+import org.scalatest.funsuite._
+import org.scalatest.matchers.should.Matchers
 import com.lkroll.ep.compendium.data.AllData.morphModels
 import scala.util.Success
 
-class MorphInstantiationTest extends FunSuite with Matchers {
+class MorphInstantiationTest extends AnyFunSuite with Matchers {
 
   test("Choice Parser should handle all compendium options") {
     val uniqueOptionsB = Set.newBuilder[String];

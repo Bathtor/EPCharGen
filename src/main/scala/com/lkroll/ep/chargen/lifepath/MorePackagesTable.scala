@@ -29,7 +29,7 @@ class MorePackagesTable(val previousPath: PostFallPathTable, val adultPath: Adul
       case PackageChoice.Focus => {
         val path = previousPath.justFocus(rand);
         assert(path.pkg.isLeft); // should only produce left paths
-        val group = path.pkg.left.get;
+        val Left(group) = path.pkg;
         ExtraPackage(group.label, group.basicPackage)
       }
       case PackageChoice.Faction => {
@@ -40,7 +40,7 @@ class MorePackagesTable(val previousPath: PostFallPathTable, val adultPath: Adul
       case PackageChoice.Customization => {
         val path = previousPath.justCustomization(rand, isAsync);
         assert(path.pkg.isRight); // should only produce right paths
-        val pkg = path.pkg.right.get;
+        val Right(pkg) = path.pkg;
         ExtraPackage(pkg.label, pkg)
       }
     }

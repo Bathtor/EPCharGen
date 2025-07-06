@@ -17,6 +17,6 @@ object Implicits {
         Some(arr.apply(index))
       }
     }
-    override def entries: Iterable[T] = arr.toIterable;
+    override def entries: Iterable[T] = arr;
   }
 }

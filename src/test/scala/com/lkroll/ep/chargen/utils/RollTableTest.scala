@@ -1,13 +1,15 @@
 package com.lkroll.ep.chargen.utils
 
 import com.lkroll.ep.chargen.RandomTest
-import org.scalatest._
+import org.scalatest.flatspec._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.OptionValues
 
-class RollTableTest extends FlatSpec with Matchers with RandomTest with OptionValues {
+class RollTableTest extends AnyFlatSpec with Matchers with RandomTest with OptionValues {
 
   val tries = 100;
   def repeat[T](f: => T): Unit = {
-    val ff = f _;
+    val ff = () => f;
     for (_ <- 1 to tries) { ff(); };
   }
 
@@ -32,17 +34,13 @@ class RollTableTest extends FlatSpec with Matchers with RandomTest with OptionVa
   }
 
   "A RollTable" should "produce values within their ranges" in {
-    val rt = RollTable(
-      (1 to 5) -> "Ok",
-      (6 to 10) -> "Ok");
+    val rt = RollTable((1 to 5) -> "Ok", (6 to 10) -> "Ok");
     repeat {
       val res = rt.randomElement(rand);
       res.value shouldBe ("Ok")
     }
   }
   it should "prevent overlapping ranges" in {
-    a[java.lang.IllegalArgumentException] should be thrownBy RollTable(
-      (1 to 5) -> "Ok",
-      (5 to 10) -> "Not Ok");
+    a[java.lang.IllegalArgumentException] should be thrownBy RollTable((1 to 5) -> "Ok", (5 to 10) -> "Not Ok");
   }
 }

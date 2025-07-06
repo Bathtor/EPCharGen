@@ -349,7 +349,7 @@ object CombineEverything {
 
   private def fixRep(rand: Random, rep: Map[RepNetwork, Int]): Map[RepNetwork, Int] = {
     var assignable = 0;
-    val reduced = rep.mapValues(
+    val reduced = rep.view.mapValues(
       v =>
         if (v > 80) {
           assignable += v - 80;
@@ -358,7 +358,7 @@ object CombineEverything {
           v
         }
     );
-    var assigned = reduced;
+    var assigned = reduced.toMap;
     val pickPoints = () => {
       if (assignable > 30) {
         val a = assignable / 2;
@@ -547,8 +547,8 @@ object CombineEverything {
       }
     }
 
-    // once we are out of CP, all we can do is zero out remaining negatives
-    val finalRep = rep.mapValues(r => if (r < 0) 0 else r);
+    // Once we are out of CP, all we can do is zero out remaining negatives.
+    val finalRep = rep.view.mapValues(r => if (r < 0) 0 else r).toMap;
     (finalRep, remainingCP)
   }
 }

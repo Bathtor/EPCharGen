@@ -1,8 +1,9 @@
 package com.lkroll.ep.chargen
 
-import org.scalatest._
+import org.scalatest.funsuite._
+import org.scalatest.matchers.should.Matchers
 
-class SpecialSamplesTest extends FunSuite with Matchers with RandomTest {
+class SpecialSamplesTest extends AnyFunSuite with Matchers with RandomTest {
 
   val specialSamples = new SpecialSamples(rand);
 

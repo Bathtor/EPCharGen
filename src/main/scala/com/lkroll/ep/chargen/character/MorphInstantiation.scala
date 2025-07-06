@@ -284,14 +284,14 @@ object ChoiceParser {
     }
   }
 
-  private def aptitudeChoiceMatcher[_: P]: P[Seq[Choice]] = P(singleChoice.rep(sep = ","));
-  private def singleChoice[_: P]: P[Choice] = P(mod ~/ "to" ~/ rep ~/ "other" ~/ apt ~/ cond.?).map {
+  private def aptitudeChoiceMatcher[$: P]: P[Seq[Choice]] = P(singleChoice.rep(sep = ","));
+  private def singleChoice[$: P]: P[Choice] = P(mod ~/ "to" ~/ rep ~/ "other" ~/ apt ~/ cond.?).map {
     case (bonus, repetition, exception) => Choice(repetition, bonus, exception)
   };
-  private def cond[_: P]: P[Aptitude] =
+  private def cond[$: P]: P[Aptitude] =
     P("except" ~/ StringIn("COG", "COO", "INT", "REF", "SAV", "SOM", "WIL").!).map(s => Aptitude.withName(s));
-  private def apt[_: P]: P[Unit] = P(StringIn("aptitude", "aptitudes", "aptitude of the player’s choice"));
-  private def rep[_: P]: P[Int] =
+  private def apt[$: P]: P[Unit] = P(StringIn("aptitude", "aptitudes", "aptitude of the player’s choice"));
+  private def rep[$: P]: P[Int] =
     P(StringIn("one", "two", "three").!).map(
       s =>
         s match {
@@ -300,10 +300,10 @@ object ChoiceParser {
           case "three" => 3
         }
     );
-  private def mod[_: P]: P[Int] = P(posMod | negMod);
-  private def posMod[_: P]: P[Int] = P("+" ~/ int);
-  private def negMod[_: P]: P[Int] = P("-" ~/ int).map(i => -i);
-  private def int[_: P]: P[Int] = P(CharsWhileIn("0123456789").!).map(s => s.toInt);
+  private def mod[$: P]: P[Int] = P(posMod | negMod);
+  private def posMod[$: P]: P[Int] = P("+" ~/ int);
+  private def negMod[$: P]: P[Int] = P("-" ~/ int).map(i => -i);
+  private def int[$: P]: P[Int] = P(CharsWhileIn("0123456789").!).map(s => s.toInt);
 }
 
 object MorphInstantiation {

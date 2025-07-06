@@ -1,10 +1,10 @@
 package com.lkroll.ep.chargen.names
 
-import akka.actor._
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
-import akka.util._
+import org.apache.pekko.actor._
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.model._
+import org.apache.pekko.stream.{ActorMaterializer, ActorMaterializerSettings}
+import org.apache.pekko.util._
 
 import upickle.default.{ReadWriter => RW, _}
 
@@ -44,7 +44,7 @@ object BehindTheName extends BehindTheNameAPI {
 }
 
 class BehindTheName(val system: ActorSystem) extends BehindTheNameAPI with StrictLogging {
-  import akka.pattern.ask;
+  import org.apache.pekko.pattern.ask;
   import system.dispatcher;
 
   private val apiKeyT = Try {
@@ -59,10 +59,10 @@ class BehindTheName(val system: ActorSystem) extends BehindTheNameAPI with Stric
     apiKeyT.map(apiKey => system.actorOf(Props(new BehindTheNameClient(apiKey)), name = "behind-the-name-client"));
 
   private val cancellableT = clientT.map { client =>
-    system.scheduler.schedule(250 milliseconds, 250 milliseconds, client, Tick)
+    system.scheduler.scheduleAtFixedRate(250 milliseconds, 250 milliseconds, client, Tick)
   };
 
-  implicit val timeout = Timeout(5 seconds);
+  implicit val timeout: Timeout = Timeout(5 seconds);
 
   override def randomName(): Future[String] = {
     val req = new RandomNameRequest(num = 1, randomSurname = true);
@@ -128,10 +128,10 @@ case object Tick
 private[names] case class OutstandingRequest(request: NameRequest, replyTo: ActorRef)
 
 class BehindTheNameClient(apiKey: String) extends Actor with ActorLogging {
-  import akka.pattern.pipe;
+  import org.apache.pekko.pattern.pipe;
   import context.dispatcher;
 
-  implicit final val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system));
+  implicit val system: ActorSystem = context.system
 
   val http = Http(context.system);
 

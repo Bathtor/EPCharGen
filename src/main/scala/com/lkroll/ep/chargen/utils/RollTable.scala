@@ -55,7 +55,7 @@ case class RollSubTables[V](tables: RollTable[RollTableLike[V]]) extends RollTab
 }
 
 class RollTable[V] extends RollTableLike[V] {
-  import collection.JavaConverters._
+  import scala.jdk.CollectionConverters._
 
   private val jmap = new java.util.TreeMap[Int, V];
   private var ceiling = 0;

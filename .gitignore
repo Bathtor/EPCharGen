@@ -46,3 +46,5 @@ application.conf
 .bloop/
 .metals/
 .vscode/
+.bsp/
+project/metals.sbt

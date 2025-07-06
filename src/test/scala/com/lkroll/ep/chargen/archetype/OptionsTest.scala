@@ -1,8 +1,9 @@
 package com.lkroll.ep.chargen.archetype
 
-import org.scalatest._
+import org.scalatest.funsuite._
+import org.scalatest.matchers.should.Matchers
 
-class OptionsTest extends FunSuite with Matchers {
+class OptionsTest extends AnyFunSuite with Matchers {
 
   test("Allegiance should read from string") {
     Allegiance.list.foreach { a =>
